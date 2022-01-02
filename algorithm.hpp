@@ -26,6 +26,16 @@ namespace ft
 	bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
 								InputIterator2 first2, InputIterator2 last2,
 								Compare comp);
+	template <class T>
+	const T &max(const T &a, const T &b)
+	{
+		return ((a < b) ? b : a);
+	}
+	template <class T, class Compare>
+	const T &max(const T &a, const T &b, Compare comp)
+	{
+		return (comp(a, b) ? b : a);
+	}
 }
 
 

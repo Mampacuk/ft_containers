@@ -1,28 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   type_traits.hpp                                    :+:      :+:    :+:   */
+/*   memory.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aisraely <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/30 16:09:52 by aisraely          #+#    #+#             */
-/*   Updated: 2021/12/30 16:09:52 by aisraely         ###   ########.fr       */
+/*   Created: 2022/01/01 20:51:47 by aisraely          #+#    #+#             */
+/*   Updated: 2022/01/01 20:51:47 by aisraely         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef TYPE_TRAITS_HPP
-# define TYPE_TRAITS_HPP
+#ifndef MEMORY_HPP
+# define MEMORY_HPP
 
 namespace ft
 {
-	// enable_if
-	template <bool Cond, class T = void> 
-		struct enable_if {};
 	template <class T>
-		struct enable_if<true, T> { typedef T type; };
-
-	template <bool Cond, class T = void>
-		typedef typename enable_if<Cond, T>::type enable_if_t;
+	T	*addressof(T &ref)
+	{
+		return (reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const char&>(ref))));
+	}
 }
 
 #endif
