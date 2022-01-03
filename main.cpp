@@ -27,21 +27,41 @@ class A
     int my_num;
   A() { num++; my_num = num; std::cout << "DEF CTORED number " << num << std::endl; }
   A(const A &a) { num++; my_num = num; std::cout << "COPY CTORED number " << num << "FROM NUMBER " << a.my_num << std::endl; }
-  ~A() { std::cout << "DCTORED number " << my_num << std::endl; }  
+  ~A() { std::cout << "DCTORED number " << my_num << std::endl; }
+  A	&operator=(const A&) { std::cout << my_num << " EQUALIZED" << std::endl; return (*this); }
 };
 
 int A::num = 0;
 
 int main()
 {
-    // std::vector<A> *hello = new std::vector<A>;
-    ft::vector<A> *hello = new ft::vector<A>;
+    // ft::vector<A> *hello = new ft::vector<A>;
 
-    hello->push_back(A());
-    
-    // hello->push_back(A());
+    // hello->insert(hello->begin(), A());
 
 	// hello->insert(hello->begin(), A());
+
+	// delete hello;
+
+    ft::vector<A> *hello = new ft::vector<A>;
+
+    hello->insert(hello->begin(), A());
+
+	hello->insert(hello->begin(), A());
+
+	// delete hello;
+
+	std::cout << std::endl << "-- STD VERSION --" << std::endl;
     
-    return 0;
+{
+	A::num = 0;
+
+	std::vector<A> *hello = new std::vector<A>;
+
+    hello->insert(hello->begin(), A());
+    
+    hello->insert(hello->begin(), A());
+
+	// hello->insert(hello->begin(), A());
+}
 }

@@ -20,9 +20,26 @@ namespace ft
 		struct enable_if {};
 	template <class T>
 		struct enable_if<true, T> { typedef T type; };
+	
+	// integral_constant
+	template<class T, T v>
+	struct integral_constant
+	{
+		typedef T value_type;
+		static const value_type value = v;
+		typedef integral_constant<T, v> type;
+		operator value_type() const throw() { return value; }
+	};
 
-	template <bool Cond, class T = void>
-		typedef typename enable_if<Cond, T>::type enable_if_t;
+	// true_type, false_type
+	typedef integral_constant<bool, true> true_type;
+	typedef integral_constant<bool, false> false_type;
+
+	// is_same
+	template<class T, class U>
+		struct is_same : false_type {};
+	template<class T>
+		struct is_same<T, T> : true_type {};
 }
 
 #endif

@@ -123,7 +123,7 @@ ft::reverse_iterator<Iterator>::reverse_iterator(iterator_type it) : _base(it) {
 
 template <class Iterator>
 template <class Iter>
-ft::reverse_iterator<Iterator>::reverse_iterator(const reverse_iterator<Iter> &rev_it) : _base(rev_it._base) {}
+ft::reverse_iterator<Iterator>::reverse_iterator(const reverse_iterator<Iter> &rev_it) : _base(rev_it.base()) {}
 
 template <class Iterator>
 typename ft::reverse_iterator<Iterator>::iterator_type ft::reverse_iterator<Iterator>::base() const
