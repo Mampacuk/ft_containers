@@ -235,7 +235,7 @@ class	ft::vector
 		explicit vector(const allocator_type &alloc = allocator_type());
 		explicit vector(size_type n, const value_type &val = value_type(), const allocator_type &alloc = allocator_type());
 		template <class InputIterator>
-			vector(InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type());
+		vector(typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first, InputIterator last, const allocator_type &alloc = allocator_type());
 		vector(const vector &x);
 		vector &operator=(const vector &x);
 
@@ -279,7 +279,9 @@ class	ft::vector
 		iterator	insert(iterator position, const value_type &val);
 		void		insert(iterator position, size_type n, const value_type &val);
 		template <class InputIterator>
-		void	insert(iterator position, InputIterator first, InputIterator last);
+		void	insert(iterator position,
+			typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first,
+			InputIterator last);
 		iterator	erase(iterator position);
 		iterator	erase(iterator first, iterator last);
 		void		swap(vector &x);
@@ -288,6 +290,7 @@ class	ft::vector
 		// allocator
 		allocator_type	get_allocator() const;
 	private:
+		void			realloc_insert(size_type offset, const value_type &val);
 		allocator_type	_alloc;
 		pointer			_data;
 		size_type		_capacity;
@@ -369,6 +372,12 @@ typename ft::vector<T, Alloc>::size_type ft::vector<T, Alloc>::max_size() const
 }
 
 template <class T, class Alloc>
+typename ft::vector<T, Alloc>::size_type ft::vector<T, Alloc>::capacity() const
+{
+	return (this->_capacity);
+}
+
+template <class T, class Alloc>
 void	ft::vector<T, Alloc>::reserve(size_type n)
 {
 	pointer		new_data;
@@ -386,10 +395,24 @@ void	ft::vector<T, Alloc>::reserve(size_type n)
 }
 
 template <class T, class Alloc>
-void	ft::vector<T, Alloc>::push_back(const value_type &val)
+void	ft::vector<T, Alloc>::realloc_insert(size_type offset, const value_type &val)
 {
-	this->insert(this->end(), val);
+	pointer		new_data;
+	size_type	new_capacity = !this->_capacity ? 1 : this->_capacity * 2;
+	new_data = this->_alloc.allocate(new_capacity);
+	this->_alloc.construct(new_data + offset, val);
+	for (size_type i = 0; i < offset; i++)
+		this->_alloc.construct(new_data + i, this->_data[i]);
+	for (size_type i = offset; i < this->_size; i++)
+		this->_alloc.construct(new_data + i + 1, this->_data[i]);
+	for (size_type i = 0; i < this->_size; i++)
+		this->_alloc.destroy(this->_data + i);
+	this->_alloc.deallocate(this->_data, this->_capacity);
+	this->_data = new_data;
+	this->_capacity = new_capacity;
+	this->_size++;
 }
+
 
 template <class T, class Alloc>
 typename ft::vector<T, Alloc>::iterator	ft::vector<T, Alloc>::insert(iterator position, const value_type &val)
@@ -397,21 +420,42 @@ typename ft::vector<T, Alloc>::iterator	ft::vector<T, Alloc>::insert(iterator po
 	if (this->_size == this->_capacity)
 	{
 		difference_type	offset = position.base() - this->_data;
-		this->reserve(ft::max(size_type(1), this->_capacity * 2));
-		position = this->begin() + offset;
+		this->realloc_insert(offset, val);
+		return (this->begin() + offset);
 	}
 	reverse_iterator it = this->rbegin();
-	// std::cout << "before the loop" << std::endl;
 	while (it != this->rend() && it.base() - 1 >= position)
 	{
 		*(it - 1) = *it;
 		++it;
 	}
-	// std::cout << "after the loop" << std::endl;
 	this->_alloc.construct(position.base(), val);
 	this->_size++;
 	return (position);
 }
+
+template <class T, class Alloc>
+void	ft::vector<T, Alloc>::push_back(const value_type &val)
+{
+	this->insert(this->end(), val);
+}
+
+template <class T, class Alloc>
+void	ft::vector<T, Alloc>::insert(iterator position, size_type n, const value_type &val)
+{
+	for (size_type i = 0; i < n; i++)
+		position = this->insert(position, val) + 1;
+}
+
+// template <class T, class Alloc>
+// template <class InputIterator>
+// void	ft::vector<T, Alloc>::insert(iterator position,
+// 			typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first,
+// 			InputIterator last)
+// {
+// 	for (ft::reverse_iterator<InputIterator> it = ft::reverse_iterator<InputIterator>(); rev_begin != rev_end; rev_begin)
+
+// }
 
 template <class T, class Alloc>
 	bool operator==(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs);
