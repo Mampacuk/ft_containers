@@ -31,6 +31,12 @@ class A
   A	&operator=(const A &a) { std::cout << my_num << " EQUALIZED TO " << a.my_num << std::endl; return (*this); }
 };
 
+std::ostream	&operator<<(std::ostream &o, const A &a)
+{
+	o << a.my_num;
+	return (o);
+}
+
 int A::num = 0;
 
 // #include "type_traits.hpp"
@@ -40,8 +46,31 @@ int A::num = 0;
 // 	std::cout << ft::is_integral<bool>::value << "     " << std::is_integral<float>::value << std::endl;
 // }
 
+# define VERSION ft
+
 int main()
 {
+	A arr[] = { A(), A(), A() };
+	VERSION::vector<A> *hello = new VERSION::vector<A>;
+    // hello->reserve(50);
+    for (int i = 0; i < 15; i++)
+        hello->push_back(A());
+        
+    
+    std::cout << "vector is: ";
+    for (VERSION::vector<A>::iterator it = hello->begin(); it != hello->end(); it++)
+        std::cout << ' ' << *it;
+    
+    std::cout << std::endl << "NOW INSERTING 3 As AT BEGIN+5, CAP IS " << hello->capacity() << std::endl << std::endl;
+    
+    
+     hello->insert(hello->begin()+5, arr, arr + 3);
+        std::cout << "CAPCACITY " << hello->capacity() << std::endl;
+        
+            std::cout << "vector is: ";
+    for (VERSION::vector<A>::iterator it = hello->begin(); it != hello->end(); it++)
+        std::cout << ' ' << *it;
+		std::cout << std::endl;
     // ft::vector<int> *hello = new ft::vector<int>;
 	// // hello->reserve(20);
 	// for (int i = 0; i < 10; i++)
@@ -82,26 +111,26 @@ int main()
 // 	std::cout << std::endl << std::endl << "-- STD VERSION --" << std::endl << std::endl;
     
 {
-	A::num = 0;
-    std::vector<A> *hello = new std::vector<A>;
-    hello->reserve(50);
-    for (int i = 0; i < 10; i++)
-        hello->push_back(A());
+	// A::num = 0;
+    // std::vector<A> *hello = new std::vector<A>;
+    // // hello->reserve(50);
+    // for (int i = 0; i < 10; i++)
+    //     hello->push_back(A());
         
     
-    std::cout << "vector is: ";
-    for (std::vector<A>::iterator it = hello->begin(); it != hello->end(); it++)
-        std::cout << ' ' << (*it).my_num;
+    // std::cout << "vector is: ";
+    // for (std::vector<A>::iterator it = hello->begin(); it != hello->end(); it++)
+    //     std::cout << ' ' << *it;
     
-    std::cout << std::endl << "NOW INSERTING 3 As AT BEGIN+5, CAP IS " << hello->capacity() << std::endl << std::endl;
+    // std::cout << std::endl << "NOW INSERTING 3 As AT BEGIN+5, CAP IS " << hello->capacity() << std::endl << std::endl;
     
     
-     hello->insert(hello->begin()+5, 3, A());
-        std::cout << "CAPCACITY " << hello->capacity() << std::endl;
+    //  hello->insert(hello->begin()+5, 3, A());
+    //     std::cout << "CAPCACITY " << hello->capacity() << std::endl;
         
-            std::cout << "vector is: ";
-    for (std::vector<A>::iterator it = hello->begin(); it != hello->end(); it++)
-        std::cout << ' ' << (*it).my_num;
+    //         std::cout << "vector is: ";
+    // for (std::vector<A>::iterator it = hello->begin(); it != hello->end(); it++)
+    //     std::cout << ' ' << *it;
 
 
 	// A::num = 0;
