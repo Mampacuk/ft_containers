@@ -13,7 +13,11 @@
 #ifndef UTILITY_HPP
 # define UTILITY_HPP
 
+# include <sstream>
 # include "pair.hpp"
+
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
 namespace ft
 {
