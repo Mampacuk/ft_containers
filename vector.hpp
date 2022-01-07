@@ -10,8 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-// revisit capacity changes when assigning/resizing/reserving!
-
 #ifndef VECTOR_HPP
 # define VECTOR_HPP
 
@@ -28,7 +26,9 @@
 namespace ft
 {
 	template <class Iterator, class Container> class normal_iterator;
-	template <class T, class Alloc = std::allocator<T> > class vector; 
+	template <class T, class Alloc = std::allocator<T> > class vector;
+	template <class T, class Alloc>
+	void	swap(vector<T, Alloc> &x, vector<T, Alloc> &y);
 }
 
 template <class Iterator, class Container>
@@ -283,7 +283,7 @@ class	ft::vector
 		iterator	insert(iterator position, const value_type &val);
 		void		insert(iterator position, size_type n, const value_type &val);
 		template <class InputIterator>
-		void	insert(iterator position,
+		void		insert(iterator position,
 			typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first,
 			InputIterator last);
 		iterator	erase(iterator position);
@@ -295,23 +295,23 @@ class	ft::vector
 		allocator_type	get_allocator() const;
 	private:
 		// insert helpers
+		void			realloc_insert(size_type offset, size_type n, const value_type &val);
 		template <class InputIterator>
 		void			realloc_assign(InputIterator first, InputIterator last, size_type n);
 		void			realloc_assign(size_type n, const value_type &val);
-		void			realloc_insert(size_type offset, size_type n, const value_type &val);
 		template <class InputIterator>
 		void			realloc_insert(size_type offset,
 			typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first,
 			InputIterator last);
 		template <class InputIterator>
 		size_type		range_length(InputIterator first, InputIterator last);
+	private:
 		// private member variables
 		allocator_type	_alloc;
 		pointer			_data;
 		size_type		_capacity;
 		size_type		_size;
 };
-
 
 // vector
 
@@ -432,7 +432,6 @@ bool	ft::vector<T, Alloc>::empty() const
 {
 	return (!this->_size);
 }
-
 
 template <class T, class Alloc>
 void	ft::vector<T, Alloc>::reserve(size_type n)
@@ -640,6 +639,28 @@ typename ft::vector<T, Alloc>::iterator	ft::vector<T, Alloc>::erase(iterator fir
 }
 
 template <class T, class Alloc>
+void	ft::vector<T, Alloc>::swap(vector &x)
+{
+	pointer		temp_data = this->_data;
+	size_type	temp_capacity = this->_capacity;
+	size_type	temp_size = this->_size;
+
+	this->_data = x._data;
+	this->_capacity = x._capacity;
+	this->_size = x._size;
+	
+	x._data = temp_data;
+	x._capacity = temp_capacity;
+	x._size = temp_size;
+}
+
+template <class T, class Alloc>
+void	ft::vector<T, Alloc>::clear()
+{
+	this->erase(this->begin(), this->end());
+}
+
+template <class T, class Alloc>
 typename ft::vector<T, Alloc>::allocator_type	ft::vector<T, Alloc>::get_allocator() const
 {
 	return (this->_alloc);
@@ -752,19 +773,47 @@ typename ft::vector<T, Alloc>::size_type ft::vector<T, Alloc>::range_length(Inpu
 }
 
 template <class T, class Alloc>
-	bool operator==(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs);
-template <class T, class Alloc>
-	bool operator!=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs);
-template <class T, class Alloc>
-	bool operator<(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs);
-template <class T, class Alloc>
-	bool operator<=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs);
-template <class T, class Alloc>
-	bool operator>(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs);
-template <class T, class Alloc>
-	bool operator>=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs);
+bool operator==(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+{
+	if (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()))
+		return (true);
+	return (false);
+}
 
 template <class T, class Alloc>
-	void swap(ft::vector<T, Alloc> &x, ft::vector<T, Alloc> &y);
+bool operator!=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+{
+	return (!(lhs == rhs));
+}
+
+template <class T, class Alloc>
+bool operator<(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+{
+	return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+}
+
+template <class T, class Alloc>
+bool operator<=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+{
+	return (!(rhs < lhs));
+}
+
+template <class T, class Alloc>
+bool operator>(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+{
+	return (rhs < lhs);
+}
+
+template <class T, class Alloc>
+bool operator>=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+{
+	return (!(lhs < rhs));
+}
+
+template <class T, class Alloc>
+void ft::swap(vector<T, Alloc> &x, vector<T, Alloc> &y)
+{
+	x.swap(y);
+}
 
 #endif
