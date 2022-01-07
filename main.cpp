@@ -46,24 +46,39 @@ int A::num = 0;
 // 	std::cout << ft::is_integral<bool>::value << "     " << std::is_integral<float>::value << std::endl;
 // }
 
-# define VERSION ft
+# define VERSION std
 
 int main()
 {
-	// A arr[] = { A(), A(), A() };
 	VERSION::vector<A> a;
+
+	// a.insert(a.begin(), arr, arr + 1); 
+	// std::cout << "inserted array" << std::endl;
+	// VERSION::vector<int> b;
 	// VERSION::vector<A> *b = new VERSION::vector<A>;
-    // a->reserve(50);
-    // for (int i = 0; i < 4; i++)
-    //     a->push_back(A());
-a.at(19);
-exit(0);
+	// for (int i = 0; i < 33; i++)
+	// 	b.push_back(i);
+	// std::cout << "b's capacity: " << b.capacity() << std::endl;
+    // a.reserve(15);
+	for (int i = 0; i < 9; i++)
+        a.push_back(A());
+
+    std::cout << "vector (cap=" << a.capacity() << ", size=" << a.size() << ") is: ";
+    for (VERSION::vector<A>::iterator it = a.begin(); it != a.end(); it++)
+        std::cout << ' ' << *it;
+    std::cout << std::endl;
+
+
+	a.erase(a.begin() + 1, a.begin() + 3);
+	// a.insert(a.begin(), 10, 1);
+	// a.assign(b.begin(), b.end());
+	// std::cout << "capacity after equalizing: " << a.capacity() << std::endl;
     // // for (int i = 0; i < 5; i++)
     // //     b->push_back(A());
-    // std::cout << "vector (cap=" << a->capacity() << ") is: ";
-    // for (VERSION::vector<A>::iterator it = a->begin(); it != a->end(); it++)
-    //     std::cout << ' ' << *it;
-    
+    std::cout << "vector (cap=" << a.capacity() << ", size=" << a.size() << ") is: ";
+    for (VERSION::vector<A>::iterator it = a.begin(); it != a.end(); it++)
+        std::cout << ' ' << *it;
+    std::cout << std::endl;
     // std::cout << std::endl << "NOW RESERVING " << std::endl << std::endl;
 
 	// a->reserve(10);
