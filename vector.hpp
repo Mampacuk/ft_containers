@@ -15,7 +15,6 @@
 
 # include <cstddef>
 # include <memory>
-# include <iostream>
 # include <exception>
 # include "memory.hpp"
 # include "iterator.hpp"
@@ -276,7 +275,7 @@ class	ft::vector
 
 		// modifiers
 		template <class InputIterator>
-		void		assign(InputIterator first, InputIterator last);
+		void		assign(typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first, InputIterator last);
 		void		assign(size_type n, const value_type &val);
 		void		push_back(const value_type &val);
 		void		pop_back();
@@ -503,7 +502,7 @@ typename ft::vector<T, Alloc>::const_reference ft::vector<T, Alloc>::back() cons
 
 template <class T, class Alloc>
 template <class InputIterator>
-void	ft::vector<T, Alloc>::assign(InputIterator first, InputIterator last)
+void	ft::vector<T, Alloc>::assign(typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first, InputIterator last)
 {
 	size_type	n = this->range_length(first, last);
 	if (n > this->_capacity)
