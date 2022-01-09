@@ -16,8 +16,10 @@
 # include <cstddef>
 # include <memory>
 # include <exception>
+# include <iostream>
 # include "memory.hpp"
 # include "iterator.hpp"
+# include <iterator>
 # include "algorithm.hpp"
 # include "type_traits.hpp"
 # include "utility.hpp"
@@ -25,14 +27,200 @@
 namespace ft
 {
 	template <class T> class list_iterator;
+	template <class T> class list_const_iterator;
+	struct list_node_base;
+	template <class T> struct list_node;
 	template <class T, class Alloc = std::allocator<T> > class list;
 	template <class T, class Alloc>
 	void	swap(list<T, Alloc> &x, list<T, Alloc> &y);
 }
 
+// util structures for list
+
+struct	ft::list_node_base
+{
+	list_node_base() : next(), prev() { }
+	list_node_base(list_node_base *next, list_node_base *prev) : next(next), prev(prev) { }
+	list_node_base	*next;
+	list_node_base	*prev;
+};
+
+template <class T>
+struct	ft::list_node : public list_node_base
+{
+	list_node(list_node_base *next, list_node_base *prev) : list_node_base(next, prev) { }
+	list_node(list_node_base *next, list_node_base *prev, const T &data) : list_node_base(next, prev), data(data) { }
+	list_node(const T &data) : data(data) { }
+	T	data;
+};
+
+// list iterators
+
+template <class T>
+class	ft::list_iterator
+{
+	protected:
+		list_node_base	*_node;
+	public:
+		// member types
+		typedef T								value_type;
+		typedef ptrdiff_t						difference_type;
+		typedef T&								reference;
+		typedef T*								pointer;
+		typedef std::bidirectional_iterator_tag	iterator_category;
+
+		friend list<T>;
+
+		list_iterator() : _node() { }
+		list_iterator(list_node_base *_node) : _node(_node) { }
+		list_iterator(const list_iterator &copy) : _node(copy._node) { }
+		~list_iterator() { }
+		list_iterator	&operator=(const list_iterator &rhs);
+		reference		operator*() const;
+		list_iterator	&operator++();
+		list_iterator	operator++(int);
+		list_iterator	&operator--();
+		list_iterator	operator--(int);
+		pointer			operator->() const;
+		friend bool			operator==(const list_iterator &lhs, const list_iterator &rhs) { return (lhs._node == rhs._node); }
+		friend bool			operator!=(const list_iterator &lhs, const list_iterator &rhs) { return (lhs._node != rhs._node); }
+};
+
+template <class T>
+ft::list_iterator<T>	&ft::list_iterator<T>::operator=(const list_iterator &rhs)
+{
+	this->_node = rhs._node;
+	return (*this);
+}
+
+template <class T>
+typename ft::list_iterator<T>::reference	ft::list_iterator<T>::operator*() const
+{
+	return (static_cast<list_node<T>*>(this->_node)->data);
+}
+
+template <class T>
+ft::list_iterator<T>	&ft::list_iterator<T>::operator++()
+{
+	this->_node =  this->_node->next;
+	return (*this);
+}
+
+template <class T>
+ft::list_iterator<T>	&ft::list_iterator<T>::operator--()
+{
+	this->_node =  this->_node->prev;
+	return (*this);
+}
+
+template <class T>
+ft::list_iterator<T>	ft::list_iterator<T>::operator++(int)
+{
+	list_iterator	temp(*this);
+	this->_node = this->_node->next;
+	return (temp);
+}
+
+template <class T>
+ft::list_iterator<T>	ft::list_iterator<T>::operator--(int)
+{
+	list_iterator	temp(*this);
+	this->_node = this->_node->prev;
+	return (temp);
+}
+
+template <class T>
+typename ft::list_iterator<T>::pointer	ft::list_iterator<T>::operator->() const
+{
+	return (&this->operator*());
+}
+
+template <class T>
+class	ft::list_const_iterator
+{
+	protected:
+		const list_node_base	*_node;
+	public:
+		// member types
+		typedef list_iterator<T>			iterator;
+		typedef T								value_type;
+		typedef ptrdiff_t						difference_type;
+		typedef const T&						reference;
+		typedef const T*						pointer;
+		typedef std::bidirectional_iterator_tag	iterator_category;
+
+		friend list<T>;
+
+		list_const_iterator() : _node() { }
+		list_const_iterator(list_node_base *_node) : _node(_node) { }
+		list_const_iterator(const iterator &copy) : _node(copy._node) { }
+		~list_const_iterator() { }
+		list_const_iterator	&operator=(const list_const_iterator &rhs);
+		list_const_iterator	&operator++();
+		list_const_iterator	operator++(int);
+		list_const_iterator	&operator--();
+		list_const_iterator	operator--(int);
+		reference			operator*() const;
+		pointer				operator->() const;
+		friend bool			operator==(const list_const_iterator &lhs, const list_const_iterator &rhs) { return (lhs._node == rhs._node); }
+		friend bool			operator!=(const list_const_iterator &lhs, const list_const_iterator &rhs) { return (lhs._node != rhs._node); }
+};
+
+template <class T>
+ft::list_const_iterator<T>	&ft::list_const_iterator<T>::operator=(const list_const_iterator &rhs)
+{
+	this->_node = rhs._node;
+	return (*this);
+}
+
+template <class T>
+typename ft::list_const_iterator<T>::reference	ft::list_const_iterator<T>::operator*() const
+{
+	return (static_cast<list_node<T>*>(this->_node)->data);
+}
+
+template <class T>
+ft::list_const_iterator<T>	&ft::list_const_iterator<T>::operator++()
+{
+	this->_node =  this->_node->next;
+	return (*this);
+}
+
+template <class T>
+ft::list_const_iterator<T>	&ft::list_const_iterator<T>::operator--()
+{
+	this->_node =  this->_node->prev;
+	return (*this);
+}
+
+template <class T>
+ft::list_const_iterator<T>	ft::list_const_iterator<T>::operator++(int)
+{
+	list_const_iterator	temp(*this);
+	this->_node = this->_node->next;
+	return (temp);
+}
+
+template <class T>
+ft::list_const_iterator<T>	ft::list_const_iterator<T>::operator--(int)
+{
+	list_const_iterator	temp(*this);
+	this->_node = this->_node->prev;
+	return (temp);
+}
+
+template <class T>
+typename ft::list_const_iterator<T>::pointer	ft::list_const_iterator<T>::operator->() const
+{
+	return (&this->operator*());
+}
+
 template <class T, class Alloc>
 class	ft::list
 {
+	protected:
+		typedef list_node<T>									node;
+		typedef typename Alloc::template rebind<node>::other	node_allocator_type;
 	public:
 		// member types
 		typedef T												value_type;
@@ -42,14 +230,14 @@ class	ft::list
 		typedef typename allocator_type::pointer				pointer;
 		typedef typename allocator_type::const_pointer			const_pointer;
 		typedef ft::list_iterator<value_type>					iterator;
-		typedef ft::list_iterator<const value_type>				const_iterator;
-		typedef ft::iterator_traits<iterator>::difference_type	difference_type;
+		typedef ft::list_const_iterator<value_type>				const_iterator;
+		typedef typename ft::iterator_traits<iterator>::difference_type	difference_type;
 		typedef size_t											size_type;
 		typedef typename ft::reverse_iterator<iterator>			reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator> 	const_reverse_iterator;
 
 		// (constructor)
-		explicit list(const allocator_type &alloc = allocator_type());	
+		explicit list(const allocator_type &alloc = allocator_type());
 		explicit list(size_type n, const value_type &val = value_type(),
 			const allocator_type &alloc = allocator_type());
 		template <class InputIterator>
@@ -121,6 +309,168 @@ class	ft::list
 
 		// observers
 		allocator_type	get_allocator() const;
+	private:
+		void	put_before(iterator position, const value_type &val = value_type());
+		void	remove_node(iterator position);
+		void	destroy_position(iterator position);
+		void	link_nodes(iterator a, iterator b);
+	private:
+		node_allocator_type	_alloc;
+		list_node_base		_header;
+		list_node_base		_trailer;
+		size_type			_size;
 };
+
+template <class T, class Alloc>
+ft::list<T, Alloc>::list(const allocator_type &alloc) : _alloc(alloc), _header(), _trailer(), _size(0)
+{
+	this->_header.next = &this->_trailer;
+	this->_trailer.prev = &this->_header;
+}
+
+template <class T, class Alloc>
+ft::list<T, Alloc>::~list()
+{
+	while (this->_size)
+		this->erase(this->begin());
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::iterator ft::list<T, Alloc>::begin()
+{
+	return (iterator(this->_header.next));
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::const_iterator ft::list<T, Alloc>::begin() const
+{
+	return (const_iterator(this->_header.next));
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::iterator ft::list<T, Alloc>::end()
+{
+	return (iterator(&this->_trailer));
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::const_iterator ft::list<T, Alloc>::end() const
+{
+	return (const_iterator(&this->_trailer));
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::reverse_iterator ft::list<T, Alloc>::rbegin()
+{
+	return (reverse_iterator(this->end()));
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::const_reverse_iterator ft::list<T, Alloc>::rbegin() const
+{
+	return (const_reverse_iterator(this->end()));
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::reverse_iterator ft::list<T, Alloc>::rend()
+{
+	return (reverse_iterator(this->begin()));
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::const_reverse_iterator ft::list<T, Alloc>::rend() const
+{
+	return (const_reverse_iterator(this->begin()));
+}
+
+template <class T, class Alloc>
+bool	ft::list<T, Alloc>::empty() const
+{
+	return (!this->_size);
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::size_type ft::list<T, Alloc>::size() const
+{
+	return (this->_size);
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::size_type ft::list<T, Alloc>::max_size() const
+{
+	return (this->_alloc.max_size());
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::iterator	ft::list<T, Alloc>::insert(iterator position, const value_type &val)
+{
+	this->put_before(position, val);
+	this->_size++;
+	return (--position);
+}
+
+template <class T, class Alloc>
+void	ft::list<T, Alloc>::insert(iterator position, size_type n, const value_type &val)
+{
+	for (size_type i = 0; i < n; i++)
+		this->insert(position, val);
+}
+
+template <class T, class Alloc>
+template <class InputIterator>
+void	ft::list<T, Alloc>::insert(iterator position,
+	typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first,
+	InputIterator last)
+{
+	while (first != last)
+	{
+		this->insert(position, *first);
+		first++;
+	}
+}
+
+template <class T, class Alloc>
+typename ft::list<T, Alloc>::iterator	ft::list<T, Alloc>::erase(iterator position)
+{
+	
+	this->remove_node(position);
+	this->_size--;
+}
+
+template <class T, class Alloc>
+void	ft::list<T, Alloc>::remove_node(iterator position)
+{
+	this->link_nodes(position - 1, position + 1);
+	this->destroy_position(position);
+}
+
+template <class T, class Alloc>
+void	ft::list<T, Alloc>::destroy_position(iterator position)
+{
+	allocator_type	alloc(this->_alloc);
+	// downcast, so that `data` can be accessed because base has only prev/next pointers
+	alloc.destroy(&static_cast<node*>(position._node)->data);
+	this->_alloc.deallocate(static_cast<node*>(position._node), 1);
+}
+
+template <class T, class Alloc>
+void	ft::list<T, Alloc>::put_before(iterator position, const value_type &val)
+{
+	allocator_type	alloc(this->_alloc);
+	node			*new_node = this->_alloc.allocate(1);
+	alloc.construct(&new_node->data, val);
+	new_node->next = position._node;
+	new_node->prev = position._node->prev;
+	new_node->prev->next = new_node;
+	position._node->prev = new_node;
+}
+
+template <class T, class Alloc>
+void	ft::list<T, Alloc>::link_nodes(iterator a, iterator b)
+{
+	// a must go before b
+	a._node->next = b._node;
+	b._node->prev = a._node;
+}
 
 #endif

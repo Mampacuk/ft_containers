@@ -23,11 +23,6 @@ namespace ft
 		struct iterator_traits<T*>;
 	template <class T>
 		struct iterator_traits<const T*>;
-	// iterator category tags
-	struct input_iterator_tag { };
-	struct forward_iterator_tag : public input_iterator_tag { };
-	struct bidirectional_iterator_tag : public forward_iterator_tag { };
-	struct random_access_iterator_tag : public bidirectional_iterator_tag { };
 	// iterator base class
 	template <class Category, class T, class Distance = ptrdiff_t,
 		class Pointer = T*, class Reference = T&>
@@ -66,7 +61,7 @@ struct ft::iterator_traits<T*>
 	typedef T								value_type;
 	typedef T*								pointer;
 	typedef T&								reference;
-	typedef ft::random_access_iterator_tag	iterator_category;
+	typedef std::random_access_iterator_tag	iterator_category;
 };
 
 template <class T>
@@ -76,14 +71,13 @@ struct ft::iterator_traits<const T*>
 	typedef T								value_type;
 	typedef const T*						pointer;
 	typedef const T&						reference;
-	typedef ft::random_access_iterator_tag	iterator_category;
+	typedef std::random_access_iterator_tag	iterator_category;
 };
 
 // reverse_iterator
 // rbegin points to the element preceding the one that would be pointed to by member end.
 template <class Iterator>
-class ft::reverse_iterator : public ft::iterator<typename Iterator::iterator_category, typename Iterator::value_type,
-			typename Iterator::difference_type, typename Iterator::pointer, typename Iterator::reference>
+class ft::reverse_iterator
 {
 	public:
 		// member types

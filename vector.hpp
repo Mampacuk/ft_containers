@@ -30,6 +30,8 @@ namespace ft
 	void	swap(vector<T, Alloc> &x, vector<T, Alloc> &y);
 }
 
+// vector iterator
+
 template <class Iterator, class Container>
 class	ft::normal_iterator
 {
@@ -45,14 +47,14 @@ class	ft::normal_iterator
 		typedef typename traits_type::reference			reference;
 		typedef typename traits_type::pointer			pointer;
 
-		normal_iterator() {}
+		normal_iterator() : _base() { }
 
 		// copy ctor allowing conversion to const_iterator
 		template<typename Iter>
 		normal_iterator(const normal_iterator<Iter,
 		typename ft::enable_if<(ft::is_same<Iter, typename Container::pointer>::value), Container>::type> &copy) : _base(copy.base()) { }
 
-		explicit normal_iterator(const Iterator &_base) : _base(_base) {}
+		explicit normal_iterator(const Iterator &_base) : _base(_base) { }
 		~normal_iterator() { }
 		normal_iterator	&operator=(const normal_iterator &rhs);
 		reference		operator*() const;
