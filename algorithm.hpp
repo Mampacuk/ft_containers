@@ -15,13 +15,15 @@
 
 namespace ft
 {
+	// equal
 	template <class InputIterator1, class InputIterator2>
 		bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2);
 	template <class InputIterator1, class InputIterator2, class BinaryPredicate>
 		bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, BinaryPredicate pred);
+	// lexicographical_compare
 	template <class InputIterator1, class InputIterator2>
-		bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
-									InputIterator2 first2, InputIterator2 last2);
+	bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
+								InputIterator2 first2, InputIterator2 last2);
 	template <class InputIterator1, class InputIterator2, class Compare>
 	bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
 								InputIterator2 first2, InputIterator2 last2,
@@ -36,6 +38,14 @@ namespace ft
 	const T &max(const T &a, const T &b, Compare comp)
 	{
 		return (comp(a, b) ? b : a);
+	}
+	// swap
+	template <class T>
+	void	swap(T &a, T &b)
+	{
+		T	temp(a);
+		a = b;
+		b = temp;
 	}
 }
 

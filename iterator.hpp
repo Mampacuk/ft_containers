@@ -14,34 +14,44 @@
 # define ITERATOR_HPP
 
 # include <cstddef>
+# include <iterator>
 
 namespace ft
 {
+	// iterator traits
 	template <class Iter>
 		struct iterator_traits;
 	template <class T>
 		struct iterator_traits<T*>;
 	template <class T>
 		struct iterator_traits<const T*>;
-	// iterator base class
-	template <class Category, class T, class Distance = ptrdiff_t,
-		class Pointer = T*, class Reference = T&>
-		struct iterator;
 	// reverse_iterator
 	template <class Iterator> class reverse_iterator;
-}
+	// distance
+	template <class It>
+	typename iterator_traits<It>::difference_type do_distance(It first, It last, std::input_iterator_tag)
+	{
+		typename iterator_traits<It>::difference_type	result = 0;
+		while (first != last)
+		{
+			++first;
+			result++;
+		}
+		return (result);
+	}
 
-// iterator base class
-template <class Category, class T, class Distance,
-		class Pointer, class Reference>
-struct ft::iterator
-{
-	typedef T			value_type;
-	typedef Distance	difference_type;
-	typedef Pointer		pointer;
-	typedef Reference	reference;
-	typedef Category	iterator_category;
-};
+	template <class It>
+	typename iterator_traits<It>::difference_type do_distance(It first, It last, std::random_access_iterator_tag)
+	{
+		return (last - first);
+	}
+
+	template <class It>
+	typename iterator_traits<It>::difference_type distance(It first, It last)
+	{
+		return (do_distance(first, last, typename iterator_traits<It>::iterator_category()));
+	}
+}
 
 // iterator_traits
 template <class Iter>

@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <vector>
 #include "vector.hpp"
 // #include "memory.hpp"
 #include <iostream>
@@ -19,16 +20,14 @@
 #include <list>
 #include "list.hpp"
 
-class A
+struct A
 {
-    public:
-
-    static int num;
-    int my_num;
-  A() { num++; my_num = num; std::cout << "DEF CTORED number " << num << std::endl; }
-  A(const A &a) { num++; my_num = num; std::cout << "COPY CTORED number " << num << " FROM NUMBER " << a.my_num << std::endl; }
-  ~A() { std::cout << "DCTORED number " << my_num << std::endl; }
-  A	&operator=(const A &a) { std::cout << my_num << " EQUALIZED TO " << a.my_num << std::endl; return (*this); }
+	static int	num;
+	int			my_num;
+	A() { num++; my_num = num; std::cout << "default-constructed number " << my_num << std::endl; }
+	A(const A &a) { num++; my_num = num; std::cout << "copy-constructed number " << my_num << " from number " << a.my_num << std::endl; }
+	~A() { std::cout << "destroyed number " << my_num << std::endl; }
+	A	&operator=(const A &a) { std::cout << my_num << " assigned to " << a.my_num << std::endl; my_num = a.my_num; return (*this); }
 };
 
 std::ostream	&operator<<(std::ostream &o, const A &a)
@@ -39,18 +38,40 @@ std::ostream	&operator<<(std::ostream &o, const A &a)
 
 int A::num = 0;
 
-# define VERSION ft
+# define VERSION std
 
-int main ()
+int main()
 {
-	VERSION::list<A>	heyooo;
-
-	heyooo.insert(heyooo.end(), 3, A());
-
-	std::cout << "list is:";
-	for (VERSION::list<A>::iterator it = heyooo.begin(); it != heyooo.end(); it++)
+	VERSION::list<A>	a;
+	VERSION::vector<int>	vec;
+	vec.reserve(vec.max_size() + 1);
+	int	arr[] = {1, 2, 3, 4};
+	VERSION::list<int>	l;
+	for (int i = 10; i < 15; i++) l.insert(l.begin(), i);
+	vec.insert(vec.end(), arr, arr+4);
+	vec.assign(l.begin(), l.end());
+	// VERSION::list<A>	b;
+	std::cout << "vector a is:";
+	for (VERSION::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
 	{
 		std::cout << ' ' << *it;
 	}
+	std::cout << std::endl;
+	a.insert(a.end(), 3, A());
+	// b.insert(b.begin(), A());
+	std::cout << "resizing to 1" << std::endl;
+	a.resize(1);
+	// std::cout << "list b is:";
+	// for (VERSION::list<A>::iterator it = b.begin(); it != b.end(); it++)
+	// {
+	// 	std::cout << ' ' << *it;
+	// }
+	// std::cout << std::endl;
+	std::cout << "list a is:";
+	for (VERSION::list<A>::iterator it = a.begin(); it != a.end(); it++)
+	{
+		std::cout << ' ' << *it;
+	}
+	std::cout << std::endl;
 	std::cout << std::endl << "dtoring..." << std::endl;
 }

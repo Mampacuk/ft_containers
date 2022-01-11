@@ -21,6 +21,7 @@
 # include "algorithm.hpp"
 # include "type_traits.hpp"
 # include "utility.hpp"
+# include <iostream>
 
 namespace ft
 {
@@ -304,8 +305,10 @@ class	ft::vector
 		void			realloc_insert(size_type offset,
 			typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first,
 			InputIterator last);
-		template <class InputIterator>
-		size_type		range_length(InputIterator first, InputIterator last);
+		pointer			allocate_a(size_type n);
+		void			deallocate_a(pointer p, size_type n);
+		template <typename ForwardIterator>
+		pointer			allocate_and_copy(size_type n, )
 	private:
 		// private member variables
 		allocator_type	_alloc;
@@ -348,8 +351,7 @@ typename ft::vector<T, Alloc>::vector &ft::vector<T, Alloc>::operator=(const vec
 template <class T, class Alloc>
 ft::vector<T, Alloc>::~vector()
 {
-	for (size_type i = this->_size; i > 0; i--)
-		this->_alloc.destroy(this->_data + (i - 1));
+	this->clear();
 	this->_alloc.deallocate(this->_data, this->_capacity);
 }
 
@@ -437,9 +439,10 @@ bool	ft::vector<T, Alloc>::empty() const
 template <class T, class Alloc>
 void	ft::vector<T, Alloc>::reserve(size_type n)
 {
+	if (n > this->max_size())
+		throw std::length_error("vector::reserve");
+	if (this->_capacity < n)
 	pointer		new_data;
-	if (this->_capacity >= n)
-		return ;
 	new_data = this->_alloc.allocate(n);
 	for (size_type i = 0; i < this->_size; i++)
 		this->_alloc.construct(new_data + i, this->_data[i]);
@@ -506,7 +509,7 @@ template <class T, class Alloc>
 template <class InputIterator>
 void	ft::vector<T, Alloc>::assign(typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first, InputIterator last)
 {
-	size_type	n = this->range_length(first, last);
+	size_type	n = distance(first, last);
 	if (n > this->_capacity)
 		this->realloc_assign(first, last, n);
 	else
@@ -599,7 +602,7 @@ void	ft::vector<T, Alloc>::insert(iterator position,
 			InputIterator last)
 {
 	size_type	offset = position.base() - this->_data;
-	size_type	n = this->range_length(first, last);
+	size_type	n = distance(first, last);
 	if (this->_size + n > this->_capacity)
 		this->realloc_insert(offset, first, last);
 	else
@@ -642,17 +645,9 @@ typename ft::vector<T, Alloc>::iterator	ft::vector<T, Alloc>::erase(iterator fir
 template <class T, class Alloc>
 void	ft::vector<T, Alloc>::swap(vector &x)
 {
-	pointer		temp_data = this->_data;
-	size_type	temp_capacity = this->_capacity;
-	size_type	temp_size = this->_size;
-
-	this->_data = x._data;
-	this->_capacity = x._capacity;
-	this->_size = x._size;
-	
-	x._data = temp_data;
-	x._capacity = temp_capacity;
-	x._size = temp_size;
+	swap(this->_data, x._data);
+	swap(this->_capacity, x._capacity);
+	swap(this->_size, x._size);
 }
 
 template <class T, class Alloc>
@@ -736,7 +731,7 @@ void	ft::vector<T, Alloc>::realloc_insert(size_type offset,
 			InputIterator last)
 {
 	pointer		new_data;
-	size_type	n = range_length(first, last);
+	size_type	n = distance(first, last);
 	size_type	new_capacity = !this->_capacity ? 1 : this->_capacity * 2;
 	// expand until n new elements will fit
 	while (new_capacity < this->_size + n) { new_capacity *= 2; }
@@ -761,16 +756,16 @@ void	ft::vector<T, Alloc>::realloc_insert(size_type offset,
 }
 
 template <class T, class Alloc>
-template <class InputIterator>
-typename ft::vector<T, Alloc>::size_type ft::vector<T, Alloc>::range_length(InputIterator first, InputIterator last)
+typename ft::vector<T, Alloc>::pointer	ft::vector<T, Alloc>::allocate_a(size_type n)
 {
-	size_type	len = 0;
-	while (first != last)
-	{
-		len++;
-		first++;
-	}
-	return (len);
+	return (n ? this->_alloc.allocate(n) : pointer());
+}
+
+template <class T, class Alloc>
+void	ft::vector<T, Alloc>::deallocate_a(pointer p, size_type n)
+{
+	if (p)
+		this->_alloc.deallocate(p, n);
 }
 
 template <class T, class Alloc>
