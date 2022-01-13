@@ -78,13 +78,13 @@ namespace ft
 
 	// max
 	template <class T>
-	const T &max(const T &a, const T &b)
+	const T	&max(const T &a, const T &b)
 	{
 		return ((a < b) ? b : a);
 	}
 
 	template <class T, class Compare>
-	const T &max(const T &a, const T &b, Compare comp)
+	const T	&max(const T &a, const T &b, Compare comp)
 	{
 		return (comp(a, b) ? b : a);
 	}
@@ -120,12 +120,20 @@ namespace ft
 
 	// fill
 	template <class ForwardIt, class T>
-	void fill(ForwardIt first, ForwardIt last, const T &value)
+	void	fill(ForwardIt first, ForwardIt last, const T &value)
 	{
 		for (; first != last; ++first)
 			*first = value;
 	}
 
+	// fill_n
+	template <class OutputIt, class Size, class T>
+	OutputIt	fill_n(OutputIt first, Size count, const T &value)
+	{
+		for (Size i = 0; i < count; i++)
+			*first++ = value;
+		return (first);
+	}
 }
 
 #endif

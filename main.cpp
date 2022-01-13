@@ -38,40 +38,55 @@ std::ostream	&operator<<(std::ostream &o, const A &a)
 
 int A::num = 0;
 
-# define VERSION std
+# define VERSION ft
 
-int main()
+int	main()
 {
-	VERSION::list<A>	a;
-	VERSION::vector<int>	vec;
-	vec.reserve(vec.max_size() + 1);
-	int	arr[] = {1, 2, 3, 4};
-	VERSION::list<int>	l;
-	for (int i = 10; i < 15; i++) l.insert(l.begin(), i);
-	vec.insert(vec.end(), arr, arr+4);
-	vec.assign(l.begin(), l.end());
-	// VERSION::list<A>	b;
-	std::cout << "vector a is:";
-	for (VERSION::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
-	{
+	// A	arr[] = {A(), A(), A()};
+	// std::cout << "array created" << std::endl;
+	// VERSION::vector<A>	v(10, A());
+
+	VERSION::vector<int>	v(5);
+
+	std::cout << "vector (size=" << v.size() << ", cap=" << v.capacity() << ") is:";
+	for (VERSION::vector<int>::iterator it = v.begin(); it != v.end(); ++it)
 		std::cout << ' ' << *it;
-	}
 	std::cout << std::endl;
-	a.insert(a.end(), 3, A());
-	// b.insert(b.begin(), A());
-	std::cout << "resizing to 1" << std::endl;
-	a.resize(1);
-	// std::cout << "list b is:";
-	// for (VERSION::list<A>::iterator it = b.begin(); it != b.end(); it++)
-	// {
-	// 	std::cout << ' ' << *it;
-	// }
-	// std::cout << std::endl;
-	std::cout << "list a is:";
-	for (VERSION::list<A>::iterator it = a.begin(); it != a.end(); it++)
-	{
-		std::cout << ' ' << *it;
-	}
-	std::cout << std::endl;
-	std::cout << std::endl << "dtoring..." << std::endl;
+	exit(0);
 }
+
+// int main()
+// {
+// 	VERSION::list<A>	a;
+// 	VERSION::vector<int>	vec;
+// 	vec.reserve(vec.max_size() + 1);
+// 	int	arr[] = {1, 2, 3, 4};
+// 	VERSION::list<int>	l;
+// 	for (int i = 10; i < 15; i++) l.insert(l.begin(), i);
+// 	vec.insert(vec.end(), arr, arr+4);
+// 	vec.assign(l.begin(), l.end());
+// 	// VERSION::list<A>	b;
+// 	std::cout << "vector a is:";
+// 	for (VERSION::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+// 	{
+// 		std::cout << ' ' << *it;
+// 	}
+// 	std::cout << std::endl;
+// 	a.insert(a.end(), 3, A());
+// 	// b.insert(b.begin(), A());
+// 	std::cout << "resizing to 1" << std::endl;
+// 	a.resize(1);
+// 	// std::cout << "list b is:";
+// 	// for (VERSION::list<A>::iterator it = b.begin(); it != b.end(); it++)
+// 	// {
+// 	// 	std::cout << ' ' << *it;
+// 	// }
+// 	// std::cout << std::endl;
+// 	std::cout << "list a is:";
+// 	for (VERSION::list<A>::iterator it = a.begin(); it != a.end(); it++)
+// 	{
+// 		std::cout << ' ' << *it;
+// 	}
+// 	std::cout << std::endl;
+// 	std::cout << std::endl << "dtoring..." << std::endl;
+// }
