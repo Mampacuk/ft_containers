@@ -162,43 +162,43 @@ typename ft::normal_iterator<Iterator, Container>::reference ft::normal_iterator
 }
 
 template <class Iterator, class Container>
-bool operator==(const typename ft::normal_iterator<Iterator, Container> &lhs,
-                   const typename ft::normal_iterator<Iterator, Container> &rhs)
+bool operator==(const ft::normal_iterator<Iterator, Container> &lhs,
+                   const ft::normal_iterator<Iterator, Container> &rhs)
 {
 	return (lhs.base() == rhs.base());
 }
 
 template <class Iterator, class Container>
-bool	operator!=(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
+bool	operator!=(const ft::normal_iterator<Iterator, Container> &lhs,
+					const ft::normal_iterator<Iterator, Container> &rhs)
 {
 	return (lhs.base() != rhs.base());
 }
 
 template <class Iterator, class Container>
-bool	operator<(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
+bool	operator<(const ft::normal_iterator<Iterator, Container> &lhs,
+					const ft::normal_iterator<Iterator, Container> &rhs)
 {
 	return (lhs.base() < rhs.base());
 }
 
 template <class Iterator, class Container>
-bool	operator<=(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
+bool	operator<=(const ft::normal_iterator<Iterator, Container> &lhs,
+					const ft::normal_iterator<Iterator, Container> &rhs)
 {
 	return (lhs.base() <= rhs.base());
 }
 
 template <class Iterator, class Container>
-bool	operator>(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
+bool	operator>(const ft::normal_iterator<Iterator, Container> &lhs,
+					const ft::normal_iterator<Iterator, Container> &rhs)
 {
 	return (lhs.base() > rhs.base());
 }
 
 template <class Iterator, class Container>
-bool	operator>=(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
+bool	operator>=(const ft::normal_iterator<Iterator, Container> &lhs,
+					const ft::normal_iterator<Iterator, Container> &rhs)
 {
 	return (lhs.base() >= rhs.base());
 }
@@ -206,15 +206,15 @@ bool	operator>=(const typename ft::normal_iterator<Iterator, Container> &lhs,
 template <class Iterator, class Container>
 typename ft::normal_iterator<Iterator, Container> operator+(
 			typename ft::normal_iterator<Iterator, Container>::difference_type n,
-			const typename ft::normal_iterator<Iterator, Container> &it)
+			const ft::normal_iterator<Iterator, Container> &it)
 {
 	return (it + n);
 }
 
 template <class Iterator, class Container>
 typename ft::normal_iterator<Iterator, Container>::difference_type operator-(
-	const typename ft::normal_iterator<Iterator, Container> &lhs,
-	const typename ft::normal_iterator<Iterator, Container> &rhs)
+	const ft::normal_iterator<Iterator, Container> &lhs,
+	const ft::normal_iterator<Iterator, Container> &rhs)
 {
 	return (lhs.base() - rhs.base());
 }
