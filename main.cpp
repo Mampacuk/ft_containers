@@ -18,7 +18,7 @@
 // #include <iterator>
 // #include <utility>
 #include <list>
-#include "list.hpp"
+// #include "list.hpp"
 
 struct A
 {
@@ -52,6 +52,9 @@ int	main()
 
 	v.assign(arr, arr+3);
 
+	VERSION::vector<int> a;
+
+	a = v;
 	std::cout << "vector (size=" << v.size() << ", cap=" << v.capacity() << ") is:";
 	for (VERSION::vector<int>::iterator it = v.begin(); it != v.end(); ++it)
 		std::cout << ' ' << *it;

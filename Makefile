@@ -14,8 +14,8 @@ NAME	= containers
 
 SRCS	= ${wildcard *.cpp}
 OBJS	= ${SRCS:.cpp=.o}
-CC		= c++
-CFLAGS	= -Wall -Wextra -Werror -std=c++98
+CC		= clang++
+CFLAGS	= -Wall -Wextra -Werror -std=c++98 --target=x86_64-w64-windows-gnu
 RM		= rm -rf
 
 all: ${NAME}

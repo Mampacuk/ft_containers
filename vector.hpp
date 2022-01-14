@@ -148,7 +148,7 @@ ft::normal_iterator<Iterator, Container> &ft::normal_iterator<Iterator, Containe
 template <class Iterator, class Container>
 typename ft::normal_iterator<Iterator, Container>::pointer ft::normal_iterator<Iterator, Container>::operator->() const
 {
-	return (&this->operator*());
+	return (addressof(operator*()));
 }
 
 template <class Iterator, class Container>
@@ -157,62 +157,65 @@ typename ft::normal_iterator<Iterator, Container>::reference ft::normal_iterator
 	return (this->_base[n]);
 }
 
-template <class Iterator, class Container>
-bool operator==(const typename ft::normal_iterator<Iterator, Container> &lhs,
-                   const typename ft::normal_iterator<Iterator, Container> &rhs)
+namespace ft
 {
-	return (lhs.base() == rhs.base());
-}
-
-template <class Iterator, class Container>
-bool	operator!=(const typename ft::normal_iterator<Iterator, Container> &lhs,
+	template <class Iterator, class Container>
+	bool operator==(const typename ft::normal_iterator<Iterator, Container> &lhs,
 					const typename ft::normal_iterator<Iterator, Container> &rhs)
-{
-	return (lhs.base() != rhs.base());
-}
+	{
+		return (lhs.base() == rhs.base());
+	}
 
-template <class Iterator, class Container>
-bool	operator<(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
-{
-	return (lhs.base() < rhs.base());
-}
+	template <class Iterator, class Container>
+	bool	operator!=(const typename ft::normal_iterator<Iterator, Container> &lhs,
+						const typename ft::normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() != rhs.base());
+	}
 
-template <class Iterator, class Container>
-bool	operator<=(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
-{
-	return (lhs.base() <= rhs.base());
-}
+	template <class Iterator, class Container>
+	bool	operator<(const typename ft::normal_iterator<Iterator, Container> &lhs,
+						const typename ft::normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() < rhs.base());
+	}
 
-template <class Iterator, class Container>
-bool	operator>(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
-{
-	return (lhs.base() > rhs.base());
-}
+	template <class Iterator, class Container>
+	bool	operator<=(const typename ft::normal_iterator<Iterator, Container> &lhs,
+						const typename ft::normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() <= rhs.base());
+	}
 
-template <class Iterator, class Container>
-bool	operator>=(const typename ft::normal_iterator<Iterator, Container> &lhs,
-					const typename ft::normal_iterator<Iterator, Container> &rhs)
-{
-	return (lhs.base() >= rhs.base());
-}
+	template <class Iterator, class Container>
+	bool	operator>(const typename ft::normal_iterator<Iterator, Container> &lhs,
+						const typename ft::normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() > rhs.base());
+	}
 
-template <class Iterator, class Container>
-typename ft::normal_iterator<Iterator, Container> operator+(
-			typename ft::normal_iterator<Iterator, Container>::difference_type n,
-			const typename ft::normal_iterator<Iterator, Container> &it)
-{
-	return (it + n);
-}
+	template <class Iterator, class Container>
+	bool	operator>=(const typename ft::normal_iterator<Iterator, Container> &lhs,
+						const typename ft::normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() >= rhs.base());
+	}
 
-template <class Iterator, class Container>
-typename ft::normal_iterator<Iterator, Container>::difference_type operator-(
-	const typename ft::normal_iterator<Iterator, Container> &lhs,
-	const typename ft::normal_iterator<Iterator, Container> &rhs)
-{
-	return (lhs.base() - rhs.base());
+	template <class Iterator, class Container>
+	typename ft::normal_iterator<Iterator, Container> operator+(
+				typename ft::normal_iterator<Iterator, Container>::difference_type n,
+				const typename ft::normal_iterator<Iterator, Container> &it)
+	{
+		return (it + n);
+	}
+
+	template <class Iterator, class Container>
+	typename ft::normal_iterator<Iterator, Container>::difference_type operator-(
+		const typename ft::normal_iterator<Iterator, Container> &lhs,
+		const typename ft::normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() - rhs.base());
+	}
 }
 
 template <class T, class Alloc>
@@ -239,7 +242,33 @@ class	ft::vector
 		template <class InputIterator>
 		vector(InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type());
 		vector(const vector &x);
-		vector &operator=(const vector &x);
+		vector &operator=(const vector &x)
+		{
+			if (&x != this)
+			{
+				const size_type	x_size = x.size();
+				// reallocate, not enough memory
+				if (x_size > this->_capacity)
+				{
+					pointer	new_data = allocate_and_copy(x_size, x.begin(), x.end());
+					clear();
+					deallocate_a(this->_data, this->_capacity);
+					this->_data = new_data;
+					this->_capacity = x_size;
+				}
+				// copy from x to this, and destroy the rest past x's elements
+				else if (this->_size >= x_size)
+					ft::destroy_a(ft::copy(x.begin(), x.end(), begin()), end(), this->_alloc);
+				// memory is enough, assign constructed objects and construct the ones that are beyond size
+				else
+				{
+					ft::copy(x._data, x._data + this->_size, this->_data);
+					ft::uninitialized_copy_a(x._data + this->_size, x._data + x_size, this->_data + this->_size, this->_alloc);
+				}
+				this->_size = x_size;
+			}
+			return (*this);
+		}
 
 		// (destructor)
 		~vector();
@@ -404,35 +433,6 @@ template <class T, class Alloc>
 ft::vector<T, Alloc>::vector(const vector &x) : _alloc(x._alloc), _data(NULL), _capacity(0), _size(0)
 {
 	range_construct(x.begin(), x.end(), std::random_access_iterator_tag());
-}
-
-template <class T, class Alloc>
-typename ft::vector<T, Alloc>::vector &ft::vector<T, Alloc>::operator=(const vector &x)
-{
-	if (&x != this)
-	{
-		const size_type	x_size = x.size();
-		// reallocate, not enough memory
-		if (x_size > this->_capacity)
-		{
-			pointer	new_data = allocate_and_copy(x_size, x.begin(), x.end());
-			clear();
-			deallocate_a(this->_data, this->_capacity);
-			this->_data = new_data;
-			this->_capacity = x_size;
-		}
-		// copy from x to this, and destroy the rest past x's elements
-		else if (this->_size >= x_size)
-			ft::destroy_a(ft::copy(x.begin(), x.end(), begin()), end(), this->_alloc);
-		// memory is enough, assign constructed objects and construct the ones that are beyond size
-		else
-		{
-			ft::copy(x._data, x._data + this->_size, this->_data);
-			ft::uninitialized_copy_a(x._data + this->_size, x._data + x_size, this->_data + this->_size, this->_alloc);
-		}
-		this->_size = x_size;
-	}
-	return (*this);
 }
 
 template <class T, class Alloc>
@@ -687,7 +687,7 @@ void	ft::vector<T, Alloc>::fill_insert(iterator position, size_type n, const val
 		if (elems_after > n)
 		{
 			// displace elements from the end of sequence to the right, beyond size, by constructing objects on uninitialized memory
-			ft::uninitialized_copy_a(this->_data + size - n, this->_data + this->_size, this->_data + this->_size, this->_alloc);
+			ft::uninitialized_copy_a(this->_data + this->_size - n, this->_data + this->_size, this->_data + this->_size, this->_alloc);
 			// copying whatever is not displaced into uninitialized memory -- backwards, because it happens to the right
 			ft::copy_backward(position.base(), this->_data + this->_size - n, this->_data + this->_size);
 			// fill in the gaps

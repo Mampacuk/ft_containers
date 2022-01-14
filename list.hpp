@@ -129,7 +129,7 @@ ft::list_iterator<T>	ft::list_iterator<T>::operator--(int)
 template <class T>
 typename ft::list_iterator<T>::pointer	ft::list_iterator<T>::operator->() const
 {
-	return (&this->operator*());
+	return (addressof(operator*()));
 }
 
 template <class T>
@@ -206,7 +206,7 @@ ft::list_const_iterator<T>	ft::list_const_iterator<T>::operator--(int)
 template <class T>
 typename ft::list_const_iterator<T>::pointer	ft::list_const_iterator<T>::operator->() const
 {
-	return (&this->operator*());
+	return (addressof(operator*()));
 }
 
 template <class T, class Alloc>
@@ -304,6 +304,8 @@ class	ft::list
 		// observers
 		allocator_type	get_allocator() const;
 	private:
+		// template <typename Integral>
+		// void			insert_dispatch()
 		void			put_before(iterator position, const value_type &val = value_type());
 		void			remove_node(iterator position);
 		list_node_base	*destroy_position(iterator position);
@@ -325,14 +327,14 @@ ft::list<T, Alloc>::list(const allocator_type &alloc) : _alloc(alloc), _header()
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::list &ft::list<T, Alloc>::operator=(const list &x)
 {
-	this->assign(x.begin(), x.end());
+	assign(x.begin(), x.end());
 	return (*this);
 }
 
 template <class T, class Alloc>
 ft::list<T, Alloc>::~list()
 {
-	this->clear();
+	clear();
 }
 
 template <class T, class Alloc>
@@ -362,25 +364,25 @@ typename ft::list<T, Alloc>::const_iterator ft::list<T, Alloc>::end() const
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::reverse_iterator ft::list<T, Alloc>::rbegin()
 {
-	return (reverse_iterator(this->end()));
+	return (reverse_iterator(end()));
 }
 
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::const_reverse_iterator ft::list<T, Alloc>::rbegin() const
 {
-	return (const_reverse_iterator(this->end()));
+	return (const_reverse_iterator(end()));
 }
 
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::reverse_iterator ft::list<T, Alloc>::rend()
 {
-	return (reverse_iterator(this->begin()));
+	return (reverse_iterator(begin()));
 }
 
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::const_reverse_iterator ft::list<T, Alloc>::rend() const
 {
-	return (const_reverse_iterator(this->begin()));
+	return (const_reverse_iterator(begin()));
 }
 
 template <class T, class Alloc>
@@ -404,93 +406,93 @@ typename ft::list<T, Alloc>::size_type ft::list<T, Alloc>::max_size() const
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::reference	ft::list<T, Alloc>::front()
 {
-	return (*this->begin());
+	return (*begin());
 }
 
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::const_reference	ft::list<T, Alloc>::front() const
 {
-	return (*this->begin());
+	return (*begin());
 }
 
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::reference	ft::list<T, Alloc>::back()
 {
-	return (*(--this->end()));
+	return (*(--end()));
 }
 
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::const_reference	ft::list<T, Alloc>::back() const
 {
-	return (*(--this->end()));
+	return (*(--end()));
 }
 
 template <class T, class Alloc>
 template <class InputIterator>
 void	ft::list<T, Alloc>::assign(typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type first, InputIterator last)
 {
-	iterator	begin = this->begin();
-	while (first != last && begin != this->end())
+	iterator	begin = begin();
+	while (first != last && begin != end())
 	{
 		*begin = *first;
 		first++;
 		begin++;
 	}
 	// if this < than range, insert the rest at the end,
-	if (begin == this->end())
-		this->insert(this->end(), first, last);
-	// else if range is shorter, erase the rest from end
+	if (begin == end())
+		insert(end(), first, last);
+	// else if range is shorter, erase the rest till end
 	else
-		this->erase(begin, this->end());
+		erase(begin, end());
 }
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::assign(size_type n, const value_type &val)
 {
 	size_type	i = 0;
-	iterator	begin = this->begin();
-	while (i < n && begin != this->end())
+	iterator	begin = begin();
+	while (i < n && begin != end())
 	{
 		*begin = val;
 		i++;
 		begin++;
 	}
 	// if this < than range, insert the rest at the end,
-	if (begin == this->end())
-		this->insert(this->end(), n - i, val);
+	if (begin == end())
+		insert(end(), n - i, val);
 	// else if range is shorter, erase the rest from end
 	else
-		this->erase(begin, this->end());
+		erase(begin, end());
 }
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::push_front(const value_type &val)
 {
-	this->insert(this->begin(), val);
+	insert(begin(), val);
 }
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::pop_front()
 {
-	this->erase(this->begin());
+	erase(begin());
 }
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::push_back(const value_type &val)
 {
-	this->insert(this->end(), val);
+	insert(end(), val);
 }
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::pop_back()
 {
-	this->erase(--this->end());
+	erase(--end());
 }
 
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::iterator	ft::list<T, Alloc>::insert(iterator position, const value_type &val)
 {
-	this->put_before(position, val);
+	put_before(position, val);
 	this->_size++;
 	return (--position);
 }
@@ -499,7 +501,7 @@ template <class T, class Alloc>
 void	ft::list<T, Alloc>::insert(iterator position, size_type n, const value_type &val)
 {
 	for (size_type i = 0; i < n; i++)
-		this->insert(position, val);
+		insert(position, val);
 }
 
 template <class T, class Alloc>
@@ -510,7 +512,7 @@ void	ft::list<T, Alloc>::insert(iterator position,
 {
 	while (first != last)
 	{
-		this->insert(position, *first);
+		insert(position, *first);
 		first++;
 	}
 }
@@ -518,7 +520,7 @@ void	ft::list<T, Alloc>::insert(iterator position,
 template <class T, class Alloc>
 typename ft::list<T, Alloc>::iterator	ft::list<T, Alloc>::erase(iterator position)
 {
-	return (this->erase(position, position._node->next));
+	return (erase(position, position._node->next));
 }
 
 template <class T, class Alloc>
@@ -529,10 +531,10 @@ typename ft::list<T, Alloc>::iterator	ft::list<T, Alloc>::erase(iterator first, 
 	list_node_base	*curr = first._node;
 	while (curr != last._node)
 	{
-		curr = this->destroy_position(curr);
+		curr = destroy_position(curr);
 		n++;
 	}
-	this->link_nodes(first_prev, last._node);
+	link_nodes(first_prev, last._node);
 	this->_size -= n;
 	return (last._node);
 }
@@ -544,27 +546,27 @@ void	ft::list<T, Alloc>::swap(list &x)
 	this->_size = x._size;
 	x._size = temp_size;
 
-	if (!this->empty() && !x.empty())
+	if (!empty() && !x.empty())
 	{
 		list_node_base	*this_header_next = this->_header.next;
-		this->link_nodes(&this->_header, x._header.next);
-		this->link_nodes(&x._header, this_header_next);
+		link_nodes(&this->_header, x._header.next);
+		link_nodes(&x._header, this_header_next);
 
 		list_node_base	*this_trailer_prev = this->_trailer.prev;
-		this->link_nodes(x._trailer.prev, &this->_trailer);
-		this->link_nodes(this_trailer_prev, &x._trailer);
+		link_nodes(x._trailer.prev, &this->_trailer);
+		link_nodes(this_trailer_prev, &x._trailer);
 	}
 	else if (!x->empty())
 	{
-		this->link_nodes(&this->_header, x._header.next);
-		this->link_nodes(x._trailer.prev, &this->_trailer);
-		this->link_nodes(&x._header, &x._trailer);
+		link_nodes(&this->_header, x._header.next);
+		link_nodes(x._trailer.prev, &this->_trailer);
+		link_nodes(&x._header, &x._trailer);
 	}
-	else if (!this->empty())
+	else if (!empty())
 	{
-		this->link_nodes(&x._header, this->_header.next);
-		this->link_nodes(this->_trailer.prev, &x._trailer);
-		this->link_nodes(&this->_header, &this->_trailer);
+		link_nodes(&x._header, this->_header.next);
+		link_nodes(this->_trailer.prev, &x._trailer);
+		link_nodes(&this->_header, &this->_trailer);
 	}
 }
 
@@ -572,33 +574,33 @@ template <class T, class Alloc>
 void	ft::list<T, Alloc>::resize(size_type n, value_type val)
 {
 	if (n > this->_size)
-		this->insert(this->end(), n - this->_size, val);
+		insert(end(), n - this->_size, val);
 	else if (n < this->_size)
 	{
 		n = this->_size - n;
 		for (size_type i = 0; i < n; i++)
-			this->pop_back();
+			pop_back();
 	}
 }
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::clear()
 {
-	while (!this->empty())
-		this->pop_front();
+	while (!empty())
+		pop_front();
 }
 
-template <class T, class Alloc>
-void	ft::list<T, Alloc>::splice(iterator position, list &x)
-{
-	this->
-}
+// template <class T, class Alloc>
+// void	ft::list<T, Alloc>::splice(iterator position, list &x)
+// {
+// 	this->
+// }
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::remove_node(iterator position)
 {
-	this->link_nodes(position._node->prev, position._node->next);
-	this->destroy_position(position);
+	link_nodes(position._node->prev, position._node->next);
+	destroy_position(position);
 }
 
 template <class T, class Alloc>
@@ -615,7 +617,7 @@ ft::list_node_base	*ft::list<T, Alloc>::destroy_position(iterator position)
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::put_before(iterator position, const value_type &val)
 {
-	node			*new_node = this->_alloc.allocate(1);
+	node	*new_node = this->_alloc.allocate(1);
 	try
 	{
 		allocator_type	alloc(this->_alloc);
@@ -626,8 +628,8 @@ void	ft::list<T, Alloc>::put_before(iterator position, const value_type &val)
 		this->_alloc.deallocate(new_node, 1);
 		throw ;
 	}
-	this->link_nodes(position._node->prev, new_node);
-	this->link_nodes(new_node, position._node);
+	link_nodes(position._node->prev, new_node);
+	link_nodes(new_node, position._node);
 }
 
 template <class T, class Alloc>
