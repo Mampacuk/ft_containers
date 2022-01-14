@@ -31,8 +31,6 @@ namespace ft
 	void	swap(vector<T, Alloc> &x, vector<T, Alloc> &y);
 }
 
-// vector iterator
-
 template <class Iterator, class Container>
 class	ft::normal_iterator
 {
@@ -71,8 +69,6 @@ class	ft::normal_iterator
 		reference		operator[](difference_type n) const;
 		const Iterator	&base() const;
 };
-
-// vector::iterator
 
 template <class Iterator, class Container>
 const typename ft::normal_iterator<Iterator, Container>::iterator_type	&ft::normal_iterator<Iterator, Container>::base() const
@@ -333,8 +329,6 @@ class	ft::vector
 		size_type		_capacity;
 		size_type		_size;
 };
-
-// vector
 
 template <class T, class Alloc>
 ft::vector<T, Alloc>::vector(const allocator_type &alloc) : _alloc(alloc), _data(NULL), _capacity(0), _size(0) {}
@@ -772,7 +766,7 @@ void	ft::vector<T, Alloc>::range_insert(iterator position, ForwardIterator first
 		if (elems_after > n)
 		{
 			// displace elements from the end of sequence to the right, beyond size, by constructing objects on uninitialized memory
-			ft::uninitialized_copy_a(this->_data + size - n, this->_data + this->_size, this->_data + this->_size, this->_alloc);
+			ft::uninitialized_copy_a(this->_data + this->_size - n, this->_data + this->_size, this->_data + this->_size, this->_alloc);
 			// copying whatever is not displaced into uninitialized memory -- backwards, because it happens to the right
 			ft::copy_backward(position.base(), this->_data + this->_size - n, this->_data + this->_size);
 			// copy range in the gap
@@ -817,7 +811,7 @@ void	ft::vector<T, Alloc>::range_insert(iterator position, ForwardIterator first
 		clear();
 		deallocate_a(this->_data, this->_capacity);
 		// assign new pointers and data
-		this->capacity = new_capacity;
+		this->_capacity = new_capacity;
 		this->_data = new_data;
 	}
 	this->_size += n;

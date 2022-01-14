@@ -46,13 +46,16 @@ int	main()
 	// std::cout << "array created" << std::endl;
 	// VERSION::vector<A>	v(10, A());
 
-	VERSION::vector<int>	v(5);
+	int	arr[] = {1, 2, 3};
+
+	VERSION::vector<int>    v;
+
+	v.assign(arr, arr+3);
 
 	std::cout << "vector (size=" << v.size() << ", cap=" << v.capacity() << ") is:";
 	for (VERSION::vector<int>::iterator it = v.begin(); it != v.end(); ++it)
 		std::cout << ' ' << *it;
 	std::cout << std::endl;
-	exit(0);
 }
 
 // int main()

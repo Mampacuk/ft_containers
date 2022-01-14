@@ -588,11 +588,11 @@ void	ft::list<T, Alloc>::clear()
 		this->pop_front();
 }
 
-// template <class T, class Alloc>
-// void	ft::list<T, Alloc>::splice(iterator position, list &x)
-// {
-// 	this->
-// }
+template <class T, class Alloc>
+void	ft::list<T, Alloc>::splice(iterator position, list &x)
+{
+	this->
+}
 
 template <class T, class Alloc>
 void	ft::list<T, Alloc>::remove_node(iterator position)
