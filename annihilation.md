@@ -30,7 +30,7 @@ int A::num = 0;
 *	Insertion, reserving and assigning may cause reallocation. In that case, both old and new objects are directly constructed back-to-back (this means one can't call `reserve()` and then inserting utility).
 ### Exceptions
 *	All versions of `at()` throw `std::out_of_range` if out of bounds
-*	`reserve()` throws `std::length_error` if n > max_size
+*	`reserve()` _and any internal allocation_ throw `std::length_error` if n > max_size
 ### Max Size
 Should be implemented by returning allocator's `max_size()`.
 *	If chosen capacity for reallocation is bigger than max_size, it should get truncated to max_size (i.e. there has to be a checking bounds function for this purpose whenever a reallocation is requested).
@@ -40,3 +40,5 @@ Should be implemented by returning allocator's `max_size()`.
 ### Reallocation
 *	All copying/constructing/filling functions (namely insert and assign) must be exception-safe! Any construction can throw, and in that case, the memory should be freed properly, if the exception is handled later by the program; not doing so will yield memory leaks. This implies that any allocations with the allocator must be guarded by a try-catch block which will destroy and deallocate the memory if at least one object construction fails.
 *	The latter implies that modifications to vector members have to be done in the right order in case if an error occurs (i.e. incrementing size before construction can result in a foul increment after a failed insert operation).
+### Template Ambiguity
+*	Insert, assign and constructor functions must use either tag dispatching or SFINAE to differentiate between two numbers (fill function) and two iterators (range function) passed. The first approach is preferrable because it's not polluting the signature of the function.

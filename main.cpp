@@ -82,11 +82,46 @@ int		main(void)
 {
 	const int size = 5;
 	TESTED_NAMESPACE::vector<TESTED_TYPE> vct(size);
+
+	for (TESTED_NAMESPACE::vector<TESTED_TYPE>::const_iterator cit = vct.begin(); cit != vct.end(); cit++)
+		std::cout << cit.base() << std::endl;
+	std::cout << vct.end().base() << std::endl;
+
 	TESTED_NAMESPACE::vector<TESTED_TYPE>::reverse_iterator it(vct.rbegin());
 	TESTED_NAMESPACE::vector<TESTED_TYPE>::const_reverse_iterator ite(vct.rend());
 
+	std::cout << "it.base().base:" << it.base().base() << std::endl;
+
+	it++;
+
+	std::cout << "it.base().base AFTER IT++:" << it.base().base() << std::endl;
+
+
+	std::cout << "ite.base().base:" << ite.base().base() << std::endl;
+
+	std::cout << std::endl << ">>> STD <<<" << std::endl << std::endl;
+
+	std::vector<TESTED_TYPE>			stdvct(size);
+
+for (std::vector<TESTED_TYPE>::const_iterator cit = stdvct.begin(); cit != stdvct.end(); cit++)
+		std::cout << ft::addressof(*cit) << std::endl;
+	std::cout << (ft::addressof(*(stdvct.end() - 1)) + 1) << std::endl;
+
+	std::vector<TESTED_TYPE>::reverse_iterator stdit(stdvct.rbegin());
+	std::vector<TESTED_TYPE>::const_reverse_iterator stdite(stdvct.rend());
+	std::cout << "stdit.base() address:" << (ft::addressof(*(stdit.base() - 1)) + 1) << std::endl;
+	std::cout << "stdite.base() address:" << ft::addressof(*(stdite.base())) << std::endl;
+
+	// std::cout << "stdit.base():" << stdit.base() << std::endl;
+	return (0);
+
+
 	for (int i = 1; it != ite; ++i)
+	{
 		*it++ = (i * 7);
+		std::cout << "hello" << std::endl;
+	}
+
 	printSize(vct, 1);
 
 	it = vct.rbegin();

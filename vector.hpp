@@ -848,6 +848,7 @@ namespace ft
 			{
 				return (this->_alloc);
 			}
+
 		protected:	
 			pointer	allocate_a(size_type n)
 			{
@@ -886,6 +887,7 @@ namespace ft
 				// in case if an overflow occured, or the doubling exceeds the max size, shrink to fit
 				return ((new_size < this->_size || new_size > this->max_size()) ? this->max_size() : new_size);
 			}
+
 		protected:
 			// private member variables
 			allocator_type	_alloc;
