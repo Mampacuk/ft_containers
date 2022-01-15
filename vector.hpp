@@ -130,9 +130,23 @@ namespace ft
 		return (lhs.base() == rhs.base());
 	}
 
+	template <class IteratorL, class IteratorR, class Container>
+	bool operator==(const normal_iterator<IteratorL, Container> &lhs,
+					const normal_iterator<IteratorR, Container> &rhs)
+	{
+		return (lhs.base() == rhs.base());
+	}
+
 	template <class Iterator, class Container>
 	bool	operator!=(const normal_iterator<Iterator, Container> &lhs,
 						const normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() != rhs.base());
+	}
+
+	template <class IteratorL, class IteratorR, class Container>
+	bool	operator!=(const normal_iterator<IteratorL, Container> &lhs,
+						const normal_iterator<IteratorR, Container> &rhs)
 	{
 		return (lhs.base() != rhs.base());
 	}
@@ -144,9 +158,23 @@ namespace ft
 		return (lhs.base() < rhs.base());
 	}
 
+	template <class IteratorL, class IteratorR, class Container>
+	bool	operator<(const normal_iterator<IteratorL, Container> &lhs,
+						const normal_iterator<IteratorR, Container> &rhs)
+	{
+		return (lhs.base() < rhs.base());
+	}
+
 	template <class Iterator, class Container>
 	bool	operator<=(const normal_iterator<Iterator, Container> &lhs,
 						const normal_iterator<Iterator, Container> &rhs)
+	{
+		return (lhs.base() <= rhs.base());
+	}
+
+	template <class IteratorL, class IteratorR, class Container>
+	bool	operator<=(const normal_iterator<IteratorL, Container> &lhs,
+						const normal_iterator<IteratorR, Container> &rhs)
 	{
 		return (lhs.base() <= rhs.base());
 	}
@@ -158,6 +186,13 @@ namespace ft
 		return (lhs.base() > rhs.base());
 	}
 
+	template <class IteratorL, class IteratorR, class Container>
+	bool	operator>(const normal_iterator<IteratorL, Container> &lhs,
+						const normal_iterator<IteratorR, Container> &rhs)
+	{
+		return (lhs.base() > rhs.base());
+	}
+
 	template <class Iterator, class Container>
 	bool	operator>=(const normal_iterator<Iterator, Container> &lhs,
 						const normal_iterator<Iterator, Container> &rhs)
@@ -165,18 +200,25 @@ namespace ft
 		return (lhs.base() >= rhs.base());
 	}
 
+	template <class IteratorL, class IteratorR, class Container>
+	bool	operator>=(const normal_iterator<IteratorL, Container> &lhs,
+						const normal_iterator<IteratorR, Container> &rhs)
+	{
+		return (lhs.base() >= rhs.base());
+	}
+
 	template <class Iterator, class Container>
-	normal_iterator<Iterator, Container> operator+(
-				typename normal_iterator<Iterator, Container>::difference_type n,
+	normal_iterator<Iterator, Container>
+	operator+(typename normal_iterator<Iterator, Container>::difference_type n,
 				const normal_iterator<Iterator, Container> &it)
 	{
 		return (it + n);
 	}
 
-	template <class Iterator, class Container>
-	typename normal_iterator<Iterator, Container>::difference_type operator-(
-		const normal_iterator<Iterator, Container> &lhs,
-		const normal_iterator<Iterator, Container> &rhs)
+	template <class IteratorL, class IteratorR, class Container>
+	typename normal_iterator<IteratorL, Container>::difference_type operator-(
+		const normal_iterator<IteratorL, Container> &lhs,
+		const normal_iterator<IteratorR, Container> &rhs)
 	{
 		return (lhs.base() - rhs.base());
 	}
@@ -278,7 +320,7 @@ namespace ft
 					if (x_size > this->_capacity)
 					{
 						pointer	new_data = allocate_and_copy(x_size, x.begin(), x.end());
-						clear();
+						ft::destroy_a(this->_data, this->_data + this->_size, this->_alloc);
 						deallocate_a(this->_data, this->_capacity);
 						this->_data = new_data;
 						this->_capacity = x_size;
@@ -356,7 +398,7 @@ namespace ft
 				return (this->_alloc.max_size());
 			}
 
-			void	resize(size_type n, value_type val)
+			void	resize(size_type n, value_type val = value_type())
 			{
 				if (n > this->_size)
 					insert(end(), n - this->_size, val);
@@ -383,7 +425,7 @@ namespace ft
 					// allocate and copy what already was initialized
 					pointer		new_data = allocate_and_copy(n, this->_data, this->_data + this->_size);
 					// free old data
-					clear();
+					ft::destroy_a(this->_data, this->_data + this->_size, this->_alloc);
 					deallocate_a(this->_data, this->_capacity);
 					this->_data = new_data;
 					this->_capacity = n;
@@ -506,7 +548,7 @@ namespace ft
 				if (len > this->_capacity)
 				{
 					pointer	temp = allocate_and_copy(len, first, last);
-					clear();
+					ft::destroy_a(this->_data, this->_data + this->_size, this->_alloc);
 					deallocate_a(this->_data, this->_capacity);
 					this->_data = temp;
 					this->_capacity = len;
@@ -587,7 +629,7 @@ namespace ft
 							deallocate_a(new_data, new_capacity);
 							throw ;
 						}
-						clear();
+						ft::destroy_a(this->_data, this->_data + this->_size, this->_alloc);
 						deallocate_a(this->_data, this->_capacity);
 						this->_data = new_data;
 						this->_capacity = new_capacity;
@@ -685,10 +727,10 @@ namespace ft
 						throw ;
 					}
 					// free old memory
-					clear();
+					ft::destroy_a(this->_data, this->_data + this->_size, this->_alloc);
 					deallocate_a(this->_data, this->_capacity);
 					// assign new pointers and data
-					this->capacity = new_capacity;
+					this->_capacity = new_capacity;
 					this->_data = new_data;
 				}
 				this->_size += n;
@@ -757,7 +799,7 @@ namespace ft
 						throw ;
 					}
 					// free old memory
-					clear();
+					ft::destroy_a(this->_data, this->_data + this->_size, this->_alloc);
 					deallocate_a(this->_data, this->_capacity);
 					// assign new pointers and data
 					this->_capacity = new_capacity;
