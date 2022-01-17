@@ -13,13 +13,11 @@
 #ifndef VECTOR_HPP
 # define VECTOR_HPP
 
-# include <exception>
 # include "memory.hpp"
 # include "iterator.hpp"
 # include "algorithm.hpp"
 # include "type_traits.hpp"
 # include "utility.hpp"
-# include <iostream>
 
 namespace ft
 {
@@ -491,14 +489,14 @@ namespace ft
 
 		protected:
 			template <typename InputIterator>
-			void	assign_dispatch(InputIterator first, InputIterator last, ft::false_type)
+			void	assign_dispatch(InputIterator first, InputIterator last, false_type)
 			{
 				// template argument was an iterator, proceed
-				range_assign(first, last, typename ft::iterator_traits<InputIterator>::iterator_category());
+				range_assign(first, last, typename iterator_traits<InputIterator>::iterator_category());
 			}
 
 			template <typename Integral>
-			void	assign_dispatch(Integral n, Integral val, ft::true_type)
+			void	assign_dispatch(Integral n, Integral val, true_type)
 			{
 				// template argument was an integer, do fill_assign() instead
 				fill_assign(n, val);
@@ -848,7 +846,6 @@ namespace ft
 			{
 				return (this->_alloc);
 			}
-
 		protected:	
 			pointer	allocate_a(size_type n)
 			{
@@ -887,7 +884,6 @@ namespace ft
 				// in case if an overflow occured, or the doubling exceeds the max size, shrink to fit
 				return ((new_size < this->_size || new_size > this->max_size()) ? this->max_size() : new_size);
 			}
-
 		protected:
 			// private member variables
 			allocator_type	_alloc;
@@ -897,7 +893,7 @@ namespace ft
 	};
 
 	template <class T, class Alloc>
-	void swap(vector<T, Alloc> &x, vector<T, Alloc> &y)
+	void	swap(vector<T, Alloc> &x, vector<T, Alloc> &y)
 	{
 		x.swap(y);
 	}

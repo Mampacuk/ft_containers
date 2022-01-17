@@ -14,6 +14,7 @@
 # define UTILITY_HPP
 
 # include <sstream>
+# include <exception>
 # include <cstddef>
 # include "pair.hpp"
 

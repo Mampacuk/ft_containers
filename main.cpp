@@ -14,6 +14,7 @@
 #include "vector.hpp"
 #include <iostream>
 #include <list>
+#include "list.hpp"
 
 struct A
 {
@@ -55,20 +56,13 @@ int A::num = 0;
 #define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
 
 template <typename T>
-void	printSize(TESTED_NAMESPACE::vector<T> const &vct, bool print_content = true)
+void	printSize(TESTED_NAMESPACE::list<T> const &lst, bool print_content = 1)
 {
-	const T_SIZE_TYPE size = vct.size();
-	const T_SIZE_TYPE capacity = vct.capacity();
-	const std::string isCapacityOk = (capacity >= size) ? "OK" : "KO";
-	// Cannot limit capacity's max value because it's implementation dependent
-
-	std::cout << "size: " << size << std::endl;
-	std::cout << "capacity: " << isCapacityOk << std::endl;
-	std::cout << "max_size: " << vct.max_size() << std::endl;
+	std::cout << "size: " << lst.size() << std::endl;
+	std::cout << "max_size: " << lst.max_size() << std::endl;
 	if (print_content)
 	{
-		typename TESTED_NAMESPACE::vector<T>::const_iterator it = vct.begin();
-		typename TESTED_NAMESPACE::vector<T>::const_iterator ite = vct.end();
+		typename TESTED_NAMESPACE::list<T>::const_iterator it = lst.begin(), ite = lst.end();
 		std::cout << std::endl << "Content is:" << std::endl;
 		for (; it != ite; ++it)
 			std::cout << "- " << *it << std::endl;
@@ -76,82 +70,59 @@ void	printSize(TESTED_NAMESPACE::vector<T> const &vct, bool print_content = true
 	std::cout << "###############################################" << std::endl;
 }
 
-#define TESTED_TYPE foo
+
+#define TESTED_TYPE int
 
 int		main(void)
 {
-	const int size = 5;
-	TESTED_NAMESPACE::vector<TESTED_TYPE> vct(size);
+	TESTED_NAMESPACE::list<TESTED_TYPE> lst(7);
+	// TESTED_NAMESPACE::list<TESTED_TYPE> lst_two(4);
+	// TESTED_NAMESPACE::list<TESTED_TYPE> lst_three;
+	// TESTED_NAMESPACE::list<TESTED_TYPE> lst_four;
 
-	for (TESTED_NAMESPACE::vector<TESTED_TYPE>::const_iterator cit = vct.begin(); cit != vct.end(); cit++)
-		std::cout << cit.base() << std::endl;
-	std::cout << vct.end().base() << std::endl;
+	// TESTED_NAMESPACE::list<TESTED_TYPE>::iterator it;
 
-	TESTED_NAMESPACE::vector<TESTED_TYPE>::reverse_iterator it(vct.rbegin());
-	TESTED_NAMESPACE::vector<TESTED_TYPE>::const_reverse_iterator ite(vct.rend());
+	for (TESTED_NAMESPACE::list<TESTED_TYPE>::iterator it = lst.begin(); it != lst.end(); ++it)
+		std::cout << *it << std::endl;
 
-	std::cout << "it.base().base:" << it.base().base() << std::endl;
+	// it = lst.begin();
+	// for (unsigned long int i = 0; i < lst.size(); ++i)
+	// {
+	// 	*it++ = (lst.size() - i) * 3;
+	// 	std::cout << "hello" << std::endl;
+	// }
+	// std::cout << "hello" << std::endl;
+	// it = lst_two.begin();
+	// for (unsigned long int i = 0; i < lst_two.size(); ++i)
+	// 	*it++ = (lst_two.size() - i) * 5;
 
-	it++;
+	// printSize(lst);
+	// printSize(lst_two);
 
-	std::cout << "it.base().base AFTER IT++:" << it.base().base() << std::endl;
+	// lst_three.assign(lst.begin(), lst.end());
+	// lst.assign(lst_two.begin(), lst_two.end());
+	// lst_two.assign(2, 42);
+	// lst_four.assign(4, 21);
 
+	// std::cout << "\t### After assign(): ###" << std::endl;
 
-	std::cout << "ite.base().base:" << ite.base().base() << std::endl;
+	// printSize(lst);
+	// printSize(lst_two);
+	// printSize(lst_three);
+	// printSize(lst_four);
 
-	std::cout << std::endl << ">>> STD <<<" << std::endl << std::endl;
+	// lst_four.assign(6, 84);
+	// printSize(lst_four);
 
-	std::vector<TESTED_TYPE>			stdvct(size);
+	// std::cout << "\t### assign() : ###" << std::endl;
 
-for (std::vector<TESTED_TYPE>::const_iterator cit = stdvct.begin(); cit != stdvct.end(); cit++)
-		std::cout << ft::addressof(*cit) << std::endl;
-	std::cout << (ft::addressof(*(stdvct.end() - 1)) + 1) << std::endl;
+	// lst.assign(5, 53);
 
-	std::vector<TESTED_TYPE>::reverse_iterator stdit(stdvct.rbegin());
-	std::vector<TESTED_TYPE>::const_reverse_iterator stdite(stdvct.rend());
-	std::cout << "stdit.base() address:" << (ft::addressof(*(stdit.base() - 1)) + 1) << std::endl;
-	std::cout << "stdite.base() address:" << ft::addressof(*(stdite.base())) << std::endl;
+	// it = lst_three.begin(); ++it; ++it; ++it;
+	// lst_two.assign(lst_three.begin(), it);
 
-	// std::cout << "stdit.base():" << stdit.base() << std::endl;
-	return (0);
+	// printSize(lst);
+	// printSize(lst_two);
 
-
-	for (int i = 1; it != ite; ++i)
-	{
-		*it++ = (i * 7);
-		std::cout << "hello" << std::endl;
-	}
-
-	printSize(vct, 1);
-
-	it = vct.rbegin();
-	ite = vct.rbegin();
-
-	std::cout << *(++ite) << std::endl;
-	std::cout << *(ite++) << std::endl;
-	std::cout << *ite++ << std::endl;
-	std::cout << *++ite << std::endl;
-
-	it->m();
-	ite->m();
-
-	std::cout << *(++it) << std::endl;
-	std::cout << *(it++) << std::endl;
-	std::cout << *it++ << std::endl;
-	std::cout << *++it << std::endl;
-
-	std::cout << *(--ite) << std::endl;
-	std::cout << *(ite--) << std::endl;
-	std::cout << *--ite << std::endl;
-	std::cout << *ite-- << std::endl;
-
-	(*it).m();
-	(*ite).m();
-
-	std::cout << *(--it) << std::endl;
-	std::cout << *(it--) << std::endl;
-	std::cout << *it-- << std::endl;
-	std::cout << *--it << std::endl;
-
-	return (0);
+	// return (0);
 }
