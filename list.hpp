@@ -616,9 +616,11 @@ namespace ft
 			template <class BinaryPredicate>
 			void	unique(BinaryPredicate binary_pred)
 			{
-				for (iterator it = begin(); it != --end(); ++it)
+				for (iterator it = begin(); it != --end() && it != end();)
 					if (binary_pred(*it, *iterator(it._node->next)))
-						it = --erase(it);
+						it = --erase(++it);
+					else
+						++it;
 			}
 
 			void	merge(list &x)
@@ -629,6 +631,8 @@ namespace ft
 			template <class Compare>
 			void	merge(list &x, Compare comp)
 			{
+				if (&x == this)
+					return ;
 				iterator	this_it = begin();
 				for (iterator x_it = x.begin(); x_it != x.end() && this_it != end();)
 				{
