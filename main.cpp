@@ -15,6 +15,7 @@
 #include <iostream>
 #include <list>
 #include "list.hpp"
+#include "stack.hpp"
 
 struct A
 {
@@ -53,38 +54,17 @@ int A::num = 0;
 
 #define TESTED_NAMESPACE ft
 
-#define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
-
-template <typename T>
-void	printSize(TESTED_NAMESPACE::list<T> const &lst, bool print_content = 1)
-{
-	std::cout << "size: " << lst.size() << std::endl;
-	std::cout << "max_size: " << lst.max_size() << std::endl;
-	if (print_content)
-	{
-		typename TESTED_NAMESPACE::list<T>::const_iterator it = lst.begin(), ite = lst.end();
-		std::cout << std::endl << "Content is:" << std::endl;
-		for (; it != ite; ++it)
-			std::cout << "- " << *it << std::endl;
-	}
-	std::cout << "###############################################" << std::endl;
-}
-
-
-#define TESTED_TYPE int
 
 int		main(void)
 {
-	TESTED_NAMESPACE::list<TESTED_TYPE> lst(7);
-	// TESTED_NAMESPACE::list<TESTED_TYPE> lst_two(4);
-	// TESTED_NAMESPACE::list<TESTED_TYPE> lst_three;
-	// TESTED_NAMESPACE::list<TESTED_TYPE> lst_four;
+	TESTED_NAMESPACE::stack<int>	hello;
+	TESTED_NAMESPACE::stack<int>	bye;
 
-	// TESTED_NAMESPACE::list<TESTED_TYPE>::iterator it;
+	hello.push(1);
 
-	for (TESTED_NAMESPACE::list<TESTED_TYPE>::iterator it = lst.begin(); it != lst.end(); ++it)
-		std::cout << *it << std::endl;
+	bye.push(5);
 
+	std::cout << (bye == hello) << std::endl;
 	// it = lst.begin();
 	// for (unsigned long int i = 0; i < lst.size(); ++i)
 	// {
