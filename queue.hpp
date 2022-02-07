@@ -1,24 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   stack.hpp                                          :+:      :+:    :+:   */
+/*   queue.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aisraely <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/29 14:33:19 by aisraely          #+#    #+#             */
-/*   Updated: 2021/12/29 14:33:19 by aisraely         ###   ########.fr       */
+/*   Created: 2022/01/21 13:57:06 by aisraely          #+#    #+#             */
+/*   Updated: 2022/01/21 13:57:06 by aisraely         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef STACK_HPP
-# define STACK_HPP
-
-# include "vector.hpp"
+#ifndef QUEUE_HPP
+# define QUEUE_HPP
 
 namespace ft
 {
-	template <class T, class Container = vector<T> >
-	class	stack
+	template <class T, class Container>
+	class	queue
 	{
 		public:
 			typedef T									value_type;
@@ -27,7 +25,7 @@ namespace ft
 		protected:
 			container_type	c;
 		public:
-			explicit stack(const container_type &ctnr = container_type()) : c(ctnr) { }
+			explicit queue(const container_type &ctnr = container_type()) : c(ctnr) { }
 
 			bool	empty() const
 			{
@@ -39,12 +37,22 @@ namespace ft
 				return (c.size());
 			}
 
-			value_type	&top()
+			value_type	&front()
+			{
+				return (c.front());
+			}
+
+			const value_type	&front() const
+			{
+				return (c.front());
+			}
+
+			value_type	&back()
 			{
 				return (c.back());
 			}
 
-			const value_type	&top() const
+			const value_type	&back() const
 			{
 				return (c.back());
 			}
@@ -56,7 +64,7 @@ namespace ft
 
 			void	pop()
 			{
-				c.pop_back();
+				c.pop_front();
 			}
 		private:
 			template <class T1, class Container1>
@@ -66,37 +74,37 @@ namespace ft
 	};
 
 	template <class T, class Container>
-	bool	operator==(const stack<T, Container> &lhs, const stack<T, Container> &rhs)
+	bool	operator==(const queue<T, Container> &lhs, const queue<T, Container> &rhs)
 	{
 		return (lhs.c == rhs.c);
 	}
 
 	template <class T, class Container>
-	bool	operator<(const stack<T, Container> &lhs, const stack<T, Container> &rhs)
+	bool	operator<(const queue<T, Container> &lhs, const queue<T, Container> &rhs)
 	{
 		return (lhs.c < rhs.c);
 	}
 
 	template <class T, class Container>
-	bool	operator!=(const stack<T, Container> &lhs, const stack<T, Container> &rhs)
+	bool	operator!=(const queue<T, Container> &lhs, const queue<T, Container> &rhs)
 	{
 		return (!(lhs == rhs));
 	}
 
 	template <class T, class Container>
-	bool	operator<=(const stack<T, Container> &lhs, const stack<T, Container> &rhs)
+	bool	operator<=(const queue<T, Container> &lhs, const queue<T, Container> &rhs)
 	{
 		return (!(rhs < lhs));
 	}
 
 	template <class T, class Container>
-	bool	operator>(const stack<T, Container> &lhs, const stack<T, Container> &rhs)
+	bool	operator>(const queue<T, Container> &lhs, const queue<T, Container> &rhs)
 	{
 		return (rhs < lhs);
 	}
 
 	template <class T, class Container>
-	bool	operator>=(const stack<T, Container> &lhs, const stack<T, Container> &rhs)
+	bool	operator>=(const queue<T, Container> &lhs, const queue<T, Container> &rhs)
 	{
 		return (!(lhs < rhs));
 	}

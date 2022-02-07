@@ -26,7 +26,6 @@ namespace ft
 	struct	list_node_base
 	{
 		list_node_base() : next(), prev() { }
-		list_node_base(list_node_base *next, list_node_base *prev) : next(next), prev(prev) { }
 		list_node_base	*next;
 		list_node_base	*prev;
 	};
@@ -34,9 +33,6 @@ namespace ft
 	template <class T>
 	struct	list_node : public list_node_base
 	{
-		list_node(list_node_base *next, list_node_base *prev) : list_node_base(next, prev) { }
-		list_node(list_node_base *next, list_node_base *prev, const T &data) : list_node_base(next, prev), data(data) { }
-		list_node(const T &data) : data(data) { }
 		T	data;
 	};
 
@@ -99,15 +95,14 @@ namespace ft
 		{
 			return (addressof(operator*()));
 		}
-
 	};
-	
+
 	template <class T>
 	bool	operator==(const list_iterator<T> &lhs, const list_iterator<T> &rhs)
 	{
 		return (lhs._node == rhs._node);
 	}
-	
+
 	template <class T>
 	bool	operator!=(const list_iterator<T> &lhs, const list_iterator<T> &rhs)
 	{
@@ -231,7 +226,14 @@ namespace ft
 			typedef size_t												size_type;
 			typedef typename ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef typename ft::reverse_iterator<const_iterator>		const_reverse_iterator;
-
+		
+		protected:
+			node_allocator_type	_alloc;
+			list_node_base		_header;
+			list_node_base		_trailer;
+			size_type			_size;
+		
+		public:
 			// (constructor)
 			explicit list(const allocator_type &alloc = allocator_type()) : _alloc(alloc), _header(), _trailer(), _size(0)
 			{
@@ -730,11 +732,6 @@ namespace ft
 				a->next = b;
 				b->prev = a;
 			}
-		protected:
-			node_allocator_type	_alloc;
-			list_node_base		_header;
-			list_node_base		_trailer;
-			size_type			_size;
 	};
 
 	template <class T, class Alloc>
@@ -742,42 +739,42 @@ namespace ft
 	{
 		x.swap(y);
 	}
-}
 
-template <class T, class Alloc>
-bool	operator==(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
-{
-	return (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
-}
+	template <class T, class Alloc>
+	bool	operator==(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
+	{
+		return (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
+	}
 
-template <class T, class Alloc>
-bool	operator!=(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
-{
-	return (!(lhs == rhs));
-}
+	template <class T, class Alloc>
+	bool	operator!=(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
+	{
+		return (!(lhs == rhs));
+	}
 
-template <class T, class Alloc>
-bool	operator<(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
-{
-	return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
-}
+	template <class T, class Alloc>
+	bool	operator<(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
+	{
+		return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+	}
 
-template <class T, class Alloc>
-bool	operator<=(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
-{
-	return (!(rhs < lhs));
-}
+	template <class T, class Alloc>
+	bool	operator<=(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
+	{
+		return (!(rhs < lhs));
+	}
 
-template <class T, class Alloc>
-bool	operator>(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
-{
-	return (rhs < lhs);
-}
+	template <class T, class Alloc>
+	bool	operator>(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
+	{
+		return (rhs < lhs);
+	}
 
-template <class T, class Alloc>
-bool	operator>=(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
-{
-	return (!(lhs < rhs));
+	template <class T, class Alloc>
+	bool	operator>=(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
+	{
+		return (!(lhs < rhs));
+	}
 }
 
 #endif

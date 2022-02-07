@@ -238,9 +238,17 @@ namespace ft
 			typedef normal_iterator<const_pointer, vector>		const_iterator;
 			typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
-
+		
+		protected:
+			// private member variables
+			allocator_type	_alloc;
+			pointer			_data;
+			size_type		_capacity;
+			size_type		_size;
+		
+		public:
 			// (constructor)
-			explicit vector(const allocator_type &alloc = allocator_type()) : _alloc(alloc), _data(NULL), _capacity(0), _size(0) {}
+			explicit vector(const allocator_type &alloc = allocator_type()) : _alloc(alloc), _data(NULL), _capacity(0), _size(0) { }
 			
 			explicit vector(size_type n, const value_type &val = value_type(), const allocator_type &alloc = allocator_type()) : _alloc(alloc), _data(NULL), _capacity(0), _size(0)
 			{
@@ -884,12 +892,6 @@ namespace ft
 				// in case if an overflow occured, or the doubling exceeds the max size, shrink to fit
 				return ((new_size < this->_size || new_size > this->max_size()) ? this->max_size() : new_size);
 			}
-		protected:
-			// private member variables
-			allocator_type	_alloc;
-			pointer			_data;
-			size_type		_capacity;
-			size_type		_size;
 	};
 
 	template <class T, class Alloc>
