@@ -13,6 +13,7 @@
 #include <iostream>
 #include <deque>
 #include <vector>
+#include "rbtree.hpp"
 
 struct A
 {
@@ -37,13 +38,5 @@ int A::num = 0;
 
 int		main(void)
 {
-	std::deque<A>	dq;
-
-	A	a;
-
-	for (int i = 1; i < 50; i++)
-	{
-		dq.push_back(a);
-		std::cout << i << std::endl;
-	}
+	ft::rbtree<int>	tree;
 }
