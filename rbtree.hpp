@@ -107,7 +107,6 @@ namespace ft
 				this->_super.left = &this->_super;
 				this->_super.right = &this->_super;
 			}
-		
 	};
 }
 
