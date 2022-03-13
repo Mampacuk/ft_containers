@@ -39,4 +39,11 @@ int A::num = 0;
 int		main(void)
 {
 	ft::rbtree<int>	tree;
+	std::cout << "end == begin? " << (tree.begin() == tree.end() ? "yes" : "no") << std::endl;
+	tree.insert(7);
+	// std::cout << "end == begin? " << (tree.begin() == tree.end() ? "yes" : "no") << std::endl;
+	tree.insert(1);
+	tree.insert(0);
+	// tree.insert(-1);
+	std::cout << "begin points to " << *tree.begin() << std::endl;
 }

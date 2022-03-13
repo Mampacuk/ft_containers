@@ -14,8 +14,13 @@ NAME	= containers
 
 SRCS	= ${wildcard *.cpp}
 OBJS	= ${SRCS:.cpp=.o}
-CC		= /c/msys64/mingw64/bin/clang++
-CFLAGS	= -Wall -Wextra -Werror -std=c++98 --target=x86_64-w64-windows-gnu
+ifeq ($(OS), Windows_NT)
+	CC		= /c/msys64/mingw64/bin/clang++
+	CFLAGS	= -Wall -Wextra -Werror -std=c++98 --target=x86_64-w64-windows-gnu
+else
+	CC		= clang++
+	CFLAGS	= -Wall -Wextra -Werror -std=c++98
+endif
 RM		= rm -rf
 
 all: ${NAME}

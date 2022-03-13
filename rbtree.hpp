@@ -61,11 +61,11 @@ namespace ft
 			return (static_cast<tree_node<T>*>(this->_node)->key);
 		}
 
-		iterator	&operator--()
+		tree_iterator	&operator--()
 		{
 			if (this->_node->left)
 			{
-				if (!(this->_node->parent && !this->_node->parent->parent)) // if not super
+				if (!(this->_node->right && this->_node->right->left == this->_node)) // if not super
 				{
 					this->_node = this->_node->left;
 					while (this->_node->right)
@@ -86,11 +86,11 @@ namespace ft
 			return (*this);
 		}
 
-		iterator	&operator++()
+		tree_iterator	&operator++()
 		{
 			if (this->_node->right)
 			{
-				if (!(this->_node->parent && !this->_node->parent->parent)) // if not super
+				if (!(this->_node->right && this->_node->right->left == this->_node)) // if not super
 				{
 					this->_node = this->_node->right;
 					while (this->_node->left)
@@ -111,6 +111,18 @@ namespace ft
 			return (*this);
 		}
 	};
+
+	template <class T>
+	bool	operator==(const tree_iterator<T> &lhs, const tree_iterator<T> &rhs)
+	{
+		return (lhs._node == rhs._node);
+	}
+
+	template <class T>
+	bool	operator!=(const tree_iterator<T> &lhs, const tree_iterator<T> &rhs)
+	{
+		return (lhs._node != rhs._node);
+	}
 
 	template <class T>
 	struct	tree_const_iterator
@@ -159,7 +171,7 @@ namespace ft
 		protected:
 			bool	is_super(tree_node_base *ptr)
 			{
-				return (ptr && ptr->parent && !ptr->parent->parent);
+				return (ptr && ptr == &this->_super);
 			}
 
 			bool	is_external(tree_node_base *ptr)
@@ -193,7 +205,7 @@ namespace ft
 				try
 				{
 					allocator_type	alloc(this->_alloc);
-					alloc.construct(&new_node->data, val);
+					alloc.construct(&new_node->key, val);
 				}
 				catch (...)
 				{
@@ -207,8 +219,13 @@ namespace ft
 			{
 				if (is_external(ptr))
 					return (NULL);
+				// std::cout << "MINIMUM(), started at " << static_cast<node*>(ptr)->key << std::endl;
+				// std::cout << "ptr->left:" << ptr->left << std::endl;
 				while (is_internal(ptr->left))
+				{
+					// std::cout << static_cast<node*>(ptr)->key << " <- am here" << std::endl;
 					ptr = ptr->left;
+				}
 				return (ptr);
 			}
 
@@ -226,15 +243,18 @@ namespace ft
 				tree_node_base	*min_node = minimum(this->_super.parent);
 				tree_node_base	*max_node = maximum(this->_super.parent);
 
-				min_node->left = this->_super;
-				max_node->right = this->_super;
+				// std::cout << static_cast<node*>(min_node)->key << " is min_node" << std::endl;
+				// std::cout << static_cast<node*>(max_node)->key << " is max_node" << std::endl;
+
+				min_node->left = &this->_super;
+				max_node->right = &this->_super;
 				this->_super.right = min_node;
 				this->_super.left = max_node;
 			}
 
 			void	left_rotate(tree_node_base *x)
 			{
-				tree_node_base	y = x->right;
+				tree_node_base	*y = x->right;
 				x->right = y->left;
 				if (is_internal(y->left))
 					y->left->parent = x;
@@ -251,7 +271,7 @@ namespace ft
 
 			void	right_rotate(tree_node_base *y)
 			{
-				tree_node_base	x = y->left;
+				tree_node_base	*x = y->left;
 				y->left = x->right;
 				if (is_internal(x->right))
 					x->right->parent = y;
@@ -266,13 +286,13 @@ namespace ft
 				y->parent = x;
 			}
 
-			void	insert_fixup(node *z)
+			void	insert_fixup(tree_node_base *z)
 			{
 				while (is_red(z->parent))
 				{
 					if (z->parent == z->parent->parent->left)
 					{
-						node	y = z->parent->parent->right;
+						tree_node_base	*y = z->parent->parent->right;
 						if (is_red(z->parent))
 						{
 							z->parent->color = black;
@@ -294,7 +314,7 @@ namespace ft
 					}
 					else
 					{
-						node	y = z->parent->parent->left;
+						tree_node_base	*y = z->parent->parent->left;
 						if (is_red(z->parent))
 						{
 							z->parent->color = black;
@@ -317,29 +337,35 @@ namespace ft
 				}
 				this->_super.parent->color = black;
 			}
-
+		public:
 			pair<iterator, bool>	insert(const value_type &val)
 			{
-				tree_node_base	*y = NULL;			// the node at which the insertion will happen
-				node			*x = this->_super.parent;	// begins at the actual root
+				node	*y = NULL;			// the node at which the insertion will happen
+				node	*x = static_cast<node*>(this->_super.parent);	// begins at the actual root
 				while (is_internal(x))
 				{
 					y = x;
 					if (this->_comp(val, x->key))
-						x = x->left;
+						x = static_cast<node*>(x->left);
 					else if (this->_comp(x->key, val))
-						x = x->right;
+						x = static_cast<node*>(x->right);
 					else	//equal
 						return (make_pair(iterator(x), false));
 				}
-				node			*z = create_node(val);
+				node	*z = create_node(val);
 				z->parent = y;
 				if (is_external(y))
 					this->_super.parent = z;
 				else if (z->key < y->key)
+				{
+					// std::cout << y->key << " is " << z->key << "'s parent" << std::endl;
 					y->left = z;
+				}
 				else
+				{
+					// std::cout << y->key << " is " << z->key << "'s parent" << std::endl;
 					y->right = z;
+				}
 				z->left = NULL;
 				z->right = NULL;
 				z->color = red;
@@ -362,7 +388,7 @@ namespace ft
 
 			iterator	end()
 			{
-				return (iterator(&this->_super.left));
+				return (iterator(&this->_super));
 			}
 	};
 }
