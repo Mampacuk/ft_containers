@@ -42,74 +42,79 @@ namespace ft
 	template <class T>
 	struct	tree_iterator
 	{
-		// member variables
-		tree_node_base							*_node;
-		// member types
-		typedef T								value_type;
-		typedef ptrdiff_t						difference_type;
-		typedef T&								reference;
-		typedef T*								pointer;
-		typedef std::bidirectional_iterator_tag	iterator_category;
-		
-		tree_iterator() : _node() { }
-		tree_iterator(tree_node_base *_node) : _node(_node) { }
-		tree_iterator(const tree_iterator &copy) : _node(copy._node) { }
-		~tree_iterator() { }
+			// member variables
+			tree_node_base							*_node;
+			// member types
+			typedef T								value_type;
+			typedef ptrdiff_t						difference_type;
+			typedef T&								reference;
+			typedef T*								pointer;
+			typedef std::bidirectional_iterator_tag	iterator_category;
 
-		reference	operator*() const
-		{
-			return (static_cast<tree_node<T>*>(this->_node)->key);
-		}
-
-		tree_iterator	&operator--()
-		{
-			if (this->_node->left)
+			tree_iterator() : _node() { }
+			tree_iterator(tree_node_base *_node) : _node(_node) { }
+			tree_iterator(const tree_iterator &copy) : _node(copy._node) { }
+			~tree_iterator() { }
+		protected:
+			bool	is_super(tree_node_base *ptr)
 			{
-				if (!(this->_node->right && this->_node->right->left == this->_node)) // if not super
+				return (ptr and ptr->right and ptr->right->left == ptr);
+			}
+		public:
+			tree_iterator	&operator=(const tree_iterator &rhs)
+			{
+				this->_node = rhs._node;
+				return (*this);
+			}
+
+			reference	operator*() const
+			{
+				return (static_cast<tree_node<T>*>(this->_node)->key);
+			}
+
+			tree_iterator	&operator--()
+			{
+				if (this->_node->left)
 				{
 					this->_node = this->_node->left;
-					while (this->_node->right)
+					while (!is_super(this->_node) and this->_node->right and !is_super(this->_node->right))
 						this->_node = this->_node->right;
 				}
-			}
-			else
-			{
-				if (this->_node == this->_node->parent->right)
-					this->_node = this->_node->parent;
 				else
 				{
-					while (this->_node->parent->left == this->_node)
+					if (this->_node == this->_node->parent->right)
 						this->_node = this->_node->parent;
-					this->_node = this->_node->parent;
+					else
+					{
+						while (this->_node->parent->left == this->_node)
+							this->_node = this->_node->parent;
+						this->_node = this->_node->parent;
+					}
 				}
+				return (*this);
 			}
-			return (*this);
-		}
 
-		tree_iterator	&operator++()
-		{
-			if (this->_node->right)
+			tree_iterator	&operator++()
 			{
-				if (!(this->_node->right && this->_node->right->left == this->_node)) // if not super
+				if (this->_node->right)
 				{
 					this->_node = this->_node->right;
-					while (this->_node->left)
+					while (!is_super(this->_node) and this->_node->left and !is_super(this->_node->left))
 						this->_node = this->_node->left;
 				}
-			}
-			else
-			{
-				if (this->_node == this->_node->parent->left)
-					this->_node = this->_node->parent;
 				else
 				{
-					while (this->_node->parent->right == this->_node)
+					if (this->_node == this->_node->parent->left)
 						this->_node = this->_node->parent;
-					this->_node = this->_node->parent;
+					else
+					{
+						while (this->_node->parent->right == this->_node)
+							this->_node = this->_node->parent;
+						this->_node = this->_node->parent;
+					}
 				}
+				return (*this);
 			}
-			return (*this);
-		}
 	};
 
 	template <class T>
@@ -169,34 +174,34 @@ namespace ft
 			node_allocator_type	_alloc;
 			value_compare		_comp;
 		protected:
-			bool	is_super(tree_node_base *ptr)
+			bool	is_super(const tree_node_base *ptr) const
 			{
-				return (ptr && ptr == &this->_super);
+				return (ptr and ptr == &this->_super);
 			}
 
-			bool	is_external(tree_node_base *ptr)
+			bool	is_external(const tree_node_base *ptr) const
 			{
-				return (!ptr || is_super(ptr));
+				return (!ptr or is_super(ptr));
 			}
 
-			bool	is_internal(tree_node_base *ptr)
+			bool	is_internal(const tree_node_base *ptr) const
 			{
 				return (!is_external(ptr));
 			}
 
-			bool	is_black(tree_node_base *ptr)
+			bool	is_black(const tree_node_base *ptr) const
 			{
-				return (is_external(ptr) || ptr->color == black);
+				return (is_external(ptr) or ptr->color == black);
 			}
 
-			bool	is_red(tree_node_base *ptr)
+			bool	is_red(const tree_node_base *ptr) const
 			{
 				return (!is_black(ptr));
 			}
 
-			bool	is_root(tree_node_base *ptr)
+			bool	is_root(const tree_node_base *ptr) const
 			{
-				return (!is_external(ptr) && !ptr->parent);
+				return (!is_external(ptr) and !ptr->parent);
 			}
 
 			node	*create_node(const value_type &val)
@@ -219,13 +224,8 @@ namespace ft
 			{
 				if (is_external(ptr))
 					return (NULL);
-				// std::cout << "MINIMUM(), started at " << static_cast<node*>(ptr)->key << std::endl;
-				// std::cout << "ptr->left:" << ptr->left << std::endl;
 				while (is_internal(ptr->left))
-				{
-					// std::cout << static_cast<node*>(ptr)->key << " <- am here" << std::endl;
 					ptr = ptr->left;
-				}
 				return (ptr);
 			}
 
@@ -242,9 +242,6 @@ namespace ft
 			{
 				tree_node_base	*min_node = minimum(this->_super.parent);
 				tree_node_base	*max_node = maximum(this->_super.parent);
-
-				// std::cout << static_cast<node*>(min_node)->key << " is min_node" << std::endl;
-				// std::cout << static_cast<node*>(max_node)->key << " is max_node" << std::endl;
 
 				min_node->left = &this->_super;
 				max_node->right = &this->_super;
@@ -293,12 +290,15 @@ namespace ft
 					if (z->parent == z->parent->parent->left)
 					{
 						tree_node_base	*y = z->parent->parent->right;
-						if (is_red(z->parent))
+						if (is_red(y))
 						{
+							// std::cout << "entered here" << std::endl;
 							z->parent->color = black;
-							y->color = black;
+							if (is_internal(y))
+								y->color = black;
 							z->parent->parent->color = red;
 							z = z->parent->parent;
+						// std::cout << static_cast<node*>(z)->key << " <- z now" << std::endl;
 						}
 						else
 						{
@@ -315,10 +315,11 @@ namespace ft
 					else
 					{
 						tree_node_base	*y = z->parent->parent->left;
-						if (is_red(z->parent))
+						if (is_red(y))
 						{
 							z->parent->color = black;
-							y->color = black;
+							if (is_internal(y))
+								y->color = black;
 							z->parent->parent->color = red;
 							z = z->parent->parent;
 						}
@@ -337,10 +338,91 @@ namespace ft
 				}
 				this->_super.parent->color = black;
 			}
+
+			void	transplant(tree_node_base *u, tree_node_base *v)
+			{
+				if (!u->parent)
+					this->_super.parent = v;
+				else if (u == u->parent->left)
+					u->parent->left = v;
+				else
+					u->parent->right = v;
+				v->parent = u->parent;
+			}
+
+			void	erase_fixup(tree_node_base *x)
+			{	// reading not done
+				while (x != this->_super.parent and is_black(x))
+				{
+					if (x == x->parent->left)
+					{
+						tree_node_base	*w = x->parent->right;
+						if (is_red(w))
+						{
+							w->color = black;
+							x->parent->color = red;
+							left_rotate(x->parent);
+							w = x->parent->right;
+						}
+						if (is_black(w->left) and is_black(w->right))
+						{
+							w->color = red;
+							x = x->parent;
+						}
+						else
+						{
+							if (is_black(w->right))
+							{
+								w->left->color = black;
+								w->color = red;
+								right_rotate(w);
+								w = x->parent->right;
+							}
+							w->color = x->parent->color;
+							x->parent->color = black;
+							w->right->color = black;
+							left_rotate(x->parent);
+							x = this->_super.parent;
+						}
+					}
+					else
+					{
+						tree_node_base	*w = x->parent->left;
+						if (is_red(w))
+						{
+							w->color = black;
+							x->parent->color = red;
+							right_rotate(x->parent);
+							w = x->parent->left;
+						}
+						if (is_black(w->right) and is_black(w->left))
+						{
+							w->color = red;
+							x = x->parent;
+						}
+						else
+						{
+							if (is_black(w->left))
+							{
+								w->right->color = black;
+								w->color = red;
+								left_rotate(w);
+								w = x->parent->left;
+							}
+							w->color = x->parent->color;
+							x->parent->color = black;
+							w->left->color = black;
+							right_rotate(x->parent);
+							x = this->_super.parent;
+						}
+					}
+				}
+				x->color = black;
+			}
 		public:
 			pair<iterator, bool>	insert(const value_type &val)
 			{
-				node	*y = NULL;			// the node at which the insertion will happen
+				node	*y = NULL;										// the node at which the insertion will happen
 				node	*x = static_cast<node*>(this->_super.parent);	// begins at the actual root
 				while (is_internal(x))
 				{
@@ -357,27 +439,71 @@ namespace ft
 				if (is_external(y))
 					this->_super.parent = z;
 				else if (z->key < y->key)
-				{
-					// std::cout << y->key << " is " << z->key << "'s parent" << std::endl;
 					y->left = z;
-				}
 				else
-				{
-					// std::cout << y->key << " is " << z->key << "'s parent" << std::endl;
 					y->right = z;
-				}
 				z->left = NULL;
 				z->right = NULL;
 				z->color = red;
+				this->_size++;
 				insert_fixup(z);
 				update_super();
 				return (make_pair(iterator(z), true));
+			}
+
+			void	erase(iterator position)
+			{
+				tree_node_base	*x;
+				tree_node_base	*z = position._node;
+				tree_node_base	*y = z;
+				color_type		y_old_color = y->color;
+				if (is_external(z->left))
+				{
+					x = z->right;
+					transplant(z, x);
+				}
+				else if (is_external(z->right))
+				{
+					x = z->left;
+					transplant(z, x)
+				}
+				else
+				{
+					y = minimum(z->right);
+					y_old_color = y->color;
+					x = y->right;
+					if (y->parent == z)
+						x->parent = y;
+					else
+					{
+						transplant(y, x);
+						y->right = z->right;
+						y->right->parent = y;
+					}
+					transplant(z, y);
+					y->left = z->left;
+					y->left->parent = y;
+					y->color = z->color;
+				}
+				if (y_old_color == black)
+					erase_fixup(x);
+				this->_size--;
 			}
 		public:
 			explicit rbtree(const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
 			{
 				this->_super.left = &this->_super;
 				this->_super.right = &this->_super;
+			}
+
+			bool		empty() const
+			{
+				return (!this->_size);
+			}
+
+			reference	root() const
+			{
+				return (*iterator(this->_super.parent));
 			}
 
 			// iterators
@@ -389,6 +515,37 @@ namespace ft
 			iterator	end()
 			{
 				return (iterator(&this->_super));
+			}
+
+			void	print_node(const tree_node_base *root, int offset) const
+			{
+				if (is_external(root))
+					return ;
+				for (int i = 0; i < offset; i++)
+					std::cout << "  ";
+				std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->key;
+				if (is_internal(root))
+					std::cout << " ( " ;
+				std::cout << std::endl;
+				this->print_node(root->left, offset + 2);
+				this->print_node(root->right, offset + 2);
+				if (is_internal(root))
+				{
+					for (int i = 0; i < offset + 1; i++)
+						std::cout << "  ";
+					std::cout << ")" << std::endl;
+				}
+			}
+
+			void	print(void) const
+			{
+				if (this->empty())
+				{
+					std::cout << "(null)" << std::endl;
+					return ;
+				}
+				std::cout << "size: " << this->_size << std::endl;
+				this->print_node(this->_super.parent, 0);
 			}
 	};
 }

@@ -398,7 +398,7 @@ namespace ft
 			void	range_assign(InputIterator first, InputIterator last)
 			{
 				iterator	begin = this->begin();
-				while (first != last && begin != end())
+				while (first != last and begin != end())
 				{
 					*begin = *first;
 					first++;
@@ -416,7 +416,7 @@ namespace ft
 			{
 				size_type	i = 0;
 				iterator	begin = this->begin();
-				while (i < n && begin != end())
+				while (i < n and begin != end())
 				{
 					*begin = val;
 					i++;
@@ -522,7 +522,7 @@ namespace ft
 			void	swap(list &x)
 			{
 				ft::swap(this->_size, x._size);
-				if (!empty() && !x.empty())
+				if (!empty() and !x.empty())
 				{
 					list_node_base	*this_header_next = this->_header.next;
 					link_nodes(&this->_header, x._header.next);
@@ -617,7 +617,7 @@ namespace ft
 			template <class BinaryPredicate>
 			void	unique(BinaryPredicate binary_pred)
 			{
-				for (iterator it = begin(); it != --end() && it != end();)
+				for (iterator it = begin(); it != --end() and it != end();)
 					if (binary_pred(*it, *iterator(it._node->next)))
 						it = --erase(++it);
 					else
@@ -635,7 +635,7 @@ namespace ft
 				if (&x == this)
 					return ;
 				iterator	this_it = begin();
-				for (iterator x_it = x.begin(); x_it != x.end() && this_it != end();)
+				for (iterator x_it = x.begin(); x_it != x.end() and this_it != end();)
 				{
 					if (comp(*x_it, *this_it))
 						splice(this_it, x, x_it++);
@@ -743,7 +743,7 @@ namespace ft
 	template <class T, class Alloc>
 	bool	operator==(const ft::list<T, Alloc> &lhs, const ft::list<T, Alloc> &rhs)
 	{
-		return (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
+		return (lhs.size() == rhs.size() and ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
 	}
 
 	template <class T, class Alloc>

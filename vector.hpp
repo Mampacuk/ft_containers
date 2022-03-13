@@ -533,7 +533,7 @@ namespace ft
 			{
 				pointer		curr = this->_data;
 				// copy starting from the beginning
-				for (; first != last && curr != this->_data + this->_size; ++curr, ++first)
+				for (; first != last and curr != this->_data + this->_size; ++curr, ++first)
 					*curr = *first;
 				// if range is shorter than the vector
 				if (first == last)
@@ -590,7 +590,7 @@ namespace ft
 				// offset, to return a valid iterator
 				const size_type	n = position - begin();
 				// building at past-end with enough capacity treated separately
-				if (this->_size != this->_capacity && position == end())
+				if (this->_size != this->_capacity and position == end())
 					this->_alloc.construct(this->_data + this->_size, val);
 				else
 				{
@@ -890,7 +890,7 @@ namespace ft
 				// either expand twice, or fit
 				const size_type	new_size = this->_size + ft::max(this->_size, n);
 				// in case if an overflow occured, or the doubling exceeds the max size, shrink to fit
-				return ((new_size < this->_size || new_size > this->max_size()) ? this->max_size() : new_size);
+				return ((new_size < this->_size or new_size > this->max_size()) ? this->max_size() : new_size);
 			}
 	};
 
@@ -903,7 +903,7 @@ namespace ft
 	template <class T, class Alloc>
 	bool operator==(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
 	{
-		return (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
+		return (lhs.size() == rhs.size() and ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
 	}
 
 	template <class T, class Alloc>

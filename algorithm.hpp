@@ -49,7 +49,7 @@ namespace ft
 	{
 		while (first1 != last1)
 		{
-			if (first2 == last2 || *first2 < *first1)
+			if (first2 == last2 or *first2 < *first1)
 				return (false);
 			else if (*first1 < *first2)
 				return (true);
@@ -66,7 +66,7 @@ namespace ft
 	{
 		while (first1 != last1)
 		{
-			if (first2 == last2 || comp(*first2, *first1))
+			if (first2 == last2 or comp(*first2, *first1))
 				return (false);
 			else if (comp(*first1, *first2))
 				return (true);
