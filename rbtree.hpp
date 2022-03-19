@@ -341,13 +341,14 @@ namespace ft
 
 			void	transplant(tree_node_base *u, tree_node_base *v)
 			{
-				if (!u->parent)
+				if (is_root(u->parent))
 					this->_super.parent = v;
 				else if (u == u->parent->left)
 					u->parent->left = v;
 				else
 					u->parent->right = v;
 				v->parent = u->parent;
+				//delete u
 			}
 
 			void	erase_fixup(tree_node_base *x)
