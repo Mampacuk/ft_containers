@@ -174,6 +174,11 @@ namespace ft
 			node_allocator_type	_alloc;
 			value_compare		_comp;
 		protected:
+			tree_node_base	*root() const
+			{
+				return (this->_super.parent);
+			}
+
 			bool	is_super(const tree_node_base *ptr) const
 			{
 				return (ptr and ptr == &this->_super);
@@ -201,7 +206,7 @@ namespace ft
 
 			bool	is_root(const tree_node_base *ptr) const
 			{
-				return (!is_external(ptr) and !ptr->parent);
+				return (is_internal(ptr) and !ptr->parent);
 			}
 
 			node	*create_node(const value_type &val)
@@ -220,7 +225,7 @@ namespace ft
 				return (new_node);
 			}
 
-			tree_node_base	*minimum(tree_node_base *ptr)
+			tree_node_base	*minimum(tree_node_base *ptr) const
 			{
 				if (is_external(ptr))
 					return (NULL);
@@ -229,7 +234,7 @@ namespace ft
 				return (ptr);
 			}
 
-			tree_node_base	*maximum(tree_node_base *ptr)
+			tree_node_base	*maximum(tree_node_base *ptr) const
 			{
 				if (is_external(ptr))
 					return (NULL);
@@ -240,9 +245,15 @@ namespace ft
 
 			void	update_super()
 			{
-				tree_node_base	*min_node = minimum(this->_super.parent);
-				tree_node_base	*max_node = maximum(this->_super.parent);
+				tree_node_base	*min_node = minimum(root());
+				tree_node_base	*max_node = maximum(root());
 
+				if (!min_node and !max_node)
+				{
+					this->_super.left = &this->_super;
+					this->_super.right = &this->_super;
+					return ;
+				}
 				min_node->left = &this->_super;
 				max_node->right = &this->_super;
 				this->_super.right = min_node;
@@ -336,24 +347,26 @@ namespace ft
 						}
 					}
 				}
-				this->_super.parent->color = black;
+				root()->color = black;
 			}
 
 			void	transplant(tree_node_base *u, tree_node_base *v)
 			{
+				// what if the tree is nullified? what are gonna be
 				if (is_root(u->parent))
 					this->_super.parent = v;
 				else if (u == u->parent->left)
 					u->parent->left = v;
 				else
 					u->parent->right = v;
-				v->parent = u->parent;
-				//delete u
+				if (is_internal(v))
+					v->parent = u->parent;
 			}
 
+			// fixes double-blackness of x's child
 			void	erase_fixup(tree_node_base *x)
-			{	// reading not done
-				while (x != this->_super.parent and is_black(x))
+			{
+				while (x != root() and is_black(x))
 				{
 					if (x == x->parent->left)
 					{
@@ -383,7 +396,7 @@ namespace ft
 							x->parent->color = black;
 							w->right->color = black;
 							left_rotate(x->parent);
-							x = this->_super.parent;
+							x = root();	// to terminate the loop
 						}
 					}
 					else
@@ -414,7 +427,7 @@ namespace ft
 							x->parent->color = black;
 							w->left->color = black;
 							right_rotate(x->parent);
-							x = this->_super.parent;
+							x = root();	// to terminate the loop
 						}
 					}
 				}
@@ -423,8 +436,8 @@ namespace ft
 		public:
 			pair<iterator, bool>	insert(const value_type &val)
 			{
-				node	*y = NULL;										// the node at which the insertion will happen
-				node	*x = static_cast<node*>(this->_super.parent);	// begins at the actual root
+				node	*y = NULL;							// the node at which the insertion will happen
+				node	*x = static_cast<node*>(root());	// begins at the actual root
 				while (is_internal(x))
 				{
 					y = x;
@@ -455,6 +468,7 @@ namespace ft
 			void	erase(iterator position)
 			{
 				tree_node_base	*x;
+				tree_node_base	x_null;
 				tree_node_base	*z = position._node;
 				tree_node_base	*y = z;
 				color_type		y_old_color = y->color;
@@ -466,7 +480,7 @@ namespace ft
 				else if (is_external(z->right))
 				{
 					x = z->left;
-					transplant(z, x)
+					transplant(z, x);
 				}
 				else
 				{
@@ -474,7 +488,14 @@ namespace ft
 					y_old_color = y->color;
 					x = y->right;
 					if (y->parent == z)
-						x->parent = y;
+					{
+						if (is_external(x))
+						{
+							x_null.parent = y;
+							y->right = &x_null; // does y->right need to be
+							x = &x_null;		// turned back into NULL?
+						}
+					}
 					else
 					{
 						transplant(y, x);
@@ -486,8 +507,12 @@ namespace ft
 					y->left->parent = y;
 					y->color = z->color;
 				}
+				destroy_node(z);
 				if (y_old_color == black)
 					erase_fixup(x);
+				if (y->right == &x_null)
+					y->right = NULL;
+				update_super();
 				this->_size--;
 			}
 		public:
@@ -502,9 +527,9 @@ namespace ft
 				return (!this->_size);
 			}
 
-			reference	root() const
+			reference	root_val() const
 			{
-				return (*iterator(this->_super.parent));
+				return (*iterator(root()));
 			}
 
 			// iterators
@@ -546,7 +571,14 @@ namespace ft
 					return ;
 				}
 				std::cout << "size: " << this->_size << std::endl;
-				this->print_node(this->_super.parent, 0);
+				this->print_node(root(), 0);
+			}
+		protected:
+			void	destroy_node(tree_node_base *x)
+			{
+				allocator_type	alloc(this->_alloc);
+				alloc.destroy(&static_cast<node*>(x)->key);
+				this->_alloc.deallocate(static_cast<node*>(x), 1);
 			}
 	};
 }
