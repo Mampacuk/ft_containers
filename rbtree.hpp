@@ -243,6 +243,36 @@ namespace ft
 				return (ptr);
 			}
 
+			tree_node_base	*successor(tree_node_base *ptr) const
+			{
+				if (is_external(ptr))
+					return (NULL);
+				if (is_internal(ptr->right))
+					return (minimum(ptr->right));
+				tree_node_base	*y = ptr->parent;
+				while (is_internal(y) and ptr == y->right)
+				{
+					ptr = y;
+					y = y->parent;
+				}
+				return (y);
+			}
+
+			tree_node_base	*predecessor(tree_node_base *ptr) const
+			{
+				if (is_external(ptr))
+					return (NULL);
+				if (is_internal(ptr->left))
+					return (maximum(ptr->left));
+				tree_node_base	*y = ptr->parent;
+				while (is_internal(y) and ptr == y->left)
+				{
+					ptr = y;
+					y = y->parent;
+				}
+				return (y);
+			}
+
 			void	update_super()
 			{
 				tree_node_base	*min_node = minimum(root());
@@ -303,13 +333,11 @@ namespace ft
 						tree_node_base	*y = z->parent->parent->right;
 						if (is_red(y))
 						{
-							// std::cout << "entered here" << std::endl;
 							z->parent->color = black;
 							if (is_internal(y))
 								y->color = black;
 							z->parent->parent->color = red;
 							z = z->parent->parent;
-						// std::cout << static_cast<node*>(z)->key << " <- z now" << std::endl;
 						}
 						else
 						{
@@ -364,7 +392,6 @@ namespace ft
 
 			void	erase_fixup(tree_node_base *x)
 			{
-				// std::cout << "fixup received as x " << x << std::endl;
 				while (x != root() and is_black(x))
 				{
 					if (x == x->parent->left)
@@ -435,20 +462,37 @@ namespace ft
 		public:
 			iterator	insert(iterator position, const value_type &val)
 			{
-
+				if (position == end())
+				{
+					if (!empty() and this->_comp(*(--end()), val))	// hint accepted
+						--position;
+					else											// hint rejected
+						position._node = NULL;
+				}
+				else if (this->_comp(k, *position))
+				{
+					iterator	inorder_before
+				}
+				return (insert_hint(position._node, val)->first);
 			}
 
 			pair<iterator, bool>	insert(const value_type &val)
 			{
-				node	*y = NULL;							// the node at which the insertion will happen
-				node	*x = static_cast<node*>(root());	// begins at the actual root
+				return (insert_hint(NULL, val));
+			}
+
+		protected:
+			pair<iterator, bool>	insert_hint(tree_node_base *hint, const value_type &val)
+			{
+				node			*y = NULL;						// the node at which the insertion will happen
+				tree_node_base	*x = (hint ? hint : root());	// take or not take the hint?
 				while (is_internal(x))
 				{
 					y = x;
-					if (this->_comp(val, x->key))
-						x = static_cast<node*>(x->left);
-					else if (this->_comp(x->key, val))
-						x = static_cast<node*>(x->right);
+					if (this->_comp(val, static_cast<node*>(x)->key))
+						x = x->left;
+					else if (this->_comp(static_cast<node*>(x)->key, val))
+						x = x->right;
 					else	//equal
 						return (make_pair(iterator(x), false));
 				}
@@ -469,6 +513,7 @@ namespace ft
 				return (make_pair(iterator(z), true));
 			}
 
+		public:
 			void	erase(iterator position)
 			{
 				tree_node_base	*x;
@@ -490,7 +535,7 @@ namespace ft
 				}
 				else
 				{
-					y = minimum(z->right);
+					y = successor(z);
 					y_old_color = y->color;
 					if (is_external(x = y->right))
 						x = &x_null;
