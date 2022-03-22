@@ -40,11 +40,24 @@ int		main(void)
 {
 	ft::rbtree<int>	tree;
 	tree.insert(5);
+
 	tree.insert(10);
+	// std::cout << "begin == end? " << (tree.begin() == tree.end() ? "yes" : "no") << std::endl;
 	tree.insert(13);
 	tree.insert(79);
 	tree.insert(0);
 	tree.insert(15);
 	tree.insert(18);
+	tree.print();
+	std::cout << "deleting " << *(++tree.begin()) << std::endl;
+	tree.erase(++tree.begin());
+	tree.print();
+
+	std::cout << "deleting " << *(++(++tree.begin())) << std::endl;
+	tree.erase(++(++tree.begin()));
+	tree.print();
+
+	std::cout << "deleting " << *(++(++(++tree.begin()))) << std::endl;
+	tree.erase(++(++(++tree.begin())));
 	tree.print();
 }

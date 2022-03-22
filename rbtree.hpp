@@ -352,8 +352,7 @@ namespace ft
 
 			void	transplant(tree_node_base *u, tree_node_base *v)
 			{
-				// what if the tree is nullified? what are gonna be
-				if (is_root(u->parent))
+				if (is_root(u))
 					this->_super.parent = v;
 				else if (u == u->parent->left)
 					u->parent->left = v;
@@ -363,9 +362,9 @@ namespace ft
 					v->parent = u->parent;
 			}
 
-			// fixes double-blackness of x's child
 			void	erase_fixup(tree_node_base *x)
 			{
+				// std::cout << "fixup received as x " << x << std::endl;
 				while (x != root() and is_black(x))
 				{
 					if (x == x->parent->left)
@@ -434,6 +433,11 @@ namespace ft
 				x->color = black;
 			}
 		public:
+			iterator	insert(iterator position, const value_type &val)
+			{
+
+			}
+
 			pair<iterator, bool>	insert(const value_type &val)
 			{
 				node	*y = NULL;							// the node at which the insertion will happen
@@ -474,27 +478,26 @@ namespace ft
 				color_type		y_old_color = y->color;
 				if (is_external(z->left))
 				{
-					x = z->right;
+					if (is_external(x = z->right))
+						x = &x_null;
 					transplant(z, x);
 				}
 				else if (is_external(z->right))
 				{
-					x = z->left;
+					if (is_external(x = z->left))
+						x = &x_null;
 					transplant(z, x);
 				}
 				else
 				{
 					y = minimum(z->right);
 					y_old_color = y->color;
-					x = y->right;
+					if (is_external(x = y->right))
+						x = &x_null;
 					if (y->parent == z)
 					{
-						if (is_external(x))
-						{
-							x_null.parent = y;
-							y->right = &x_null; // does y->right need to be
-							x = &x_null;		// turned back into NULL?
-						}
+						y->right = x;
+						x->parent = y;
 					}
 					else
 					{
@@ -510,8 +513,13 @@ namespace ft
 				destroy_node(z);
 				if (y_old_color == black)
 					erase_fixup(x);
-				if (y->right == &x_null)
-					y->right = NULL;
+				if (x == &x_null)
+				{
+					if (x->parent->left == x)
+						x->parent->left = NULL;
+					else if (x->parent->right == x)
+						x->parent->right = NULL;
+				}
 				update_super();
 				this->_size--;
 			}
@@ -520,6 +528,15 @@ namespace ft
 			{
 				this->_super.left = &this->_super;
 				this->_super.right = &this->_super;
+			}
+
+			template <class InputIterator>
+			rbtree(InputIterator first, InputIterator last, const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
+			{
+				this->_super.left = &this->_super;
+				this->_super.right = &this->_super;
+				for (; first != last; ++first)
+					insert(*first);
 			}
 
 			bool		empty() const
@@ -550,6 +567,8 @@ namespace ft
 				for (int i = 0; i < offset; i++)
 					std::cout << "  ";
 				std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->key;
+				if (root->parent)
+					std::cout << (root == root->parent->left ? "L" : "R");
 				if (is_internal(root))
 					std::cout << " ( " ;
 				std::cout << std::endl;
