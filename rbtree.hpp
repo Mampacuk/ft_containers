@@ -462,30 +462,49 @@ namespace ft
 		public:
 			iterator	insert(iterator position, const value_type &val)
 			{
-				if (position == end())
+				if (position == end())					// hint is end()
 				{
-					if (!empty() and this->_comp(*(--end()), val))	// hint accepted
-						--position;
+					if (!empty() and this->_comp(*(--end()), val))	// hint accepted, i.e. val becomes maximum
+						return (hinted_insert((--position)._node, val)->first);
 					else											// hint rejected
-						position._node = NULL;
+						return (hinted_insert(NULL, val)->first);
 				}
-				else if (this->_comp(k, *position))
+				else if (this->_comp(val, *position))	// if inserted node is smaller than hint
 				{
-					iterator	inorder_before
+					// compare with predecessor
+					iterator	pred = position;
+					if (position == begin())				// hint is begin() and is a valid hint, new min destined
+						return (hinted_insert(position._node, val)->first);
+					else if (this->_comp(*(--pred), val))	// ensure dest. is in the same subtree
+						return (hinted_insert(position._node, val)->first);
+					else
+						return (hinted_insert(NULL, val)->first);
 				}
-				return (insert_hint(position._node, val)->first);
+				else if (this->_comp(*position, val))
+				{
+					// compare with successor
+					iterator	succ = position;
+					if (position == *(--end()))	// hint accepted, new maximum destined
+						return (hinted_insert(position._node, val)->first);
+					else if (this->_comp(val, *(++position)))	// ensure dest. is in the same subtree
+						return (hinted_insert(position._node, val)->first);
+					else
+						return (hinted_insert(NULL, val)->first);
+				}
+				else
+					return (hinted_insert(position._node, val)->first);	// else is equal to hint
 			}
 
 			pair<iterator, bool>	insert(const value_type &val)
 			{
-				return (insert_hint(NULL, val));
+				return (hinted_insert(NULL, val));
 			}
 
 		protected:
-			pair<iterator, bool>	insert_hint(tree_node_base *hint, const value_type &val)
+			pair<iterator, bool>	hinted_insert(tree_node_base *hint, const value_type &val)
 			{
 				node			*y = NULL;						// the node at which the insertion will happen
-				tree_node_base	*x = (hint ? hint : root());	// take or not take the hint?
+				tree_node_base	*x = (is_internal(hint) ? hint : root());	// take or not take the hint?
 				while (is_internal(x))
 				{
 					y = x;
