@@ -307,6 +307,395 @@ namespace ft
 			size_type			_size;
 			node_allocator_type	_alloc;
 			value_compare		_comp;
+		public:
+			explicit rbtree(const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
+			{
+				update_super();
+			}
+
+			template <class InputIterator>
+			rbtree(InputIterator first, InputIterator last, const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
+			{
+				update_super();
+				insert(first, last);
+			}
+
+			rbtree(const rbtree &x) : _super(), _size(), _alloc(x._alloc), _comp(x._comp)
+			{
+				update_super();
+				insert(x.begin(), x.end());
+			}
+
+			~rbtree()
+			{
+				clear();
+			}
+
+			rbtree	&operator=(const rbtree &x)
+			{
+				clear();
+				insert(x.begin(), x.end());
+				return (*this);
+			}
+
+			// iterators
+			iterator	begin()
+			{
+				return (iterator(this->_super.right));
+			}
+
+			const_iterator	begin() const
+			{
+				return (const_iterator(this->_super.right));
+			}
+
+			iterator	end()
+			{
+				return (iterator(&this->_super));
+			}
+
+			const_iterator	end() const
+			{
+				return (const_iterator(&this->_super));
+			}
+
+			reverse_iterator	rbegin()
+			{
+				return (reverse_iterator(end()));
+			}
+
+			const_reverse_iterator	rbegin() const
+			{
+				return (const_reverse_iterator(end()));
+			}
+
+			reverse_iterator	rend()
+			{
+				return (reverse_iterator(begin()));
+			}
+
+			const_reverse_iterator	rend() const
+			{
+				return (const_reverse_iterator(begin()));
+			}
+
+			// capacity
+			bool		empty() const
+			{
+				return (!this->_size);
+			}
+			
+			size_type	size() const
+			{
+				return (this->_size);
+			}
+
+			size_type	max_size() const
+			{
+				return (this->_alloc.max_size());
+			}
+
+			// element access
+			// operator[] should be implemented in map
+
+		public:
+			iterator	insert(iterator position, const value_type &val)
+			{
+				if (position == end())					// hint is end()
+				{
+					if (!empty() and this->_comp(*(--end()), val))	// hint accepted, i.e. val becomes maximum
+						return (hinted_insert((--position)._node, val)->first);
+					else											// hint rejected
+						return (hinted_insert(NULL, val)->first);
+				}
+				else if (this->_comp(val, *position))	// if inserted node is smaller than hint
+				{
+					// compare with predecessor
+					iterator	pred = position;
+					if (position == begin())				// hint is begin() and is a valid hint, new min destined
+						return (hinted_insert(position._node, val)->first);
+					else if (this->_comp(*(--pred), val))	// ensure dest. is in the same subtree
+						return (hinted_insert(position._node, val)->first);
+					else
+						return (hinted_insert(NULL, val)->first);
+				}
+				else if (this->_comp(*position, val))
+				{
+					// compare with successor
+					iterator	succ = position;
+					if (position == *(--end()))	// hint accepted, new maximum destined
+						return (hinted_insert(position._node, val)->first);
+					else if (this->_comp(val, *(++position)))	// ensure dest. is in the same subtree
+						return (hinted_insert(position._node, val)->first);
+					else
+						return (hinted_insert(NULL, val)->first);
+				}
+				else
+					return (hinted_insert(position._node, val)->first);	// else is equal to hint
+			}
+
+			pair<iterator, bool>	insert(const value_type &val)
+			{
+				return (hinted_insert(NULL, val));
+			}
+
+			template <class InputIterator>
+			void	insert(InputIterator first, InputIterator last)
+			{
+				iterator	hint;
+				for (; first != last; ++first)			// speeds up the process if
+					hint = insert(hint, *first)->first;	// elements are already sorted
+			}
+		protected:
+			pair<iterator, bool>	hinted_insert(tree_node_base *hint, const value_type &val)
+			{
+				tree_node_base	*y = NULL;						// the node at which the insertion will happen
+				tree_node_base	*x = (is_internal(hint) ? hint : root());	// take or not take the hint?
+				while (is_internal(x))
+				{
+					y = x;
+					if (this->_comp(val, static_cast<node*>(x)->key))
+						x = x->left;
+					else if (this->_comp(static_cast<node*>(x)->key, val))
+						x = x->right;
+					else	//equal
+						return (make_pair(iterator(x), false));
+				}
+				node	*z = create_node(val);
+				z->parent = y;
+				if (is_external(y))
+					this->_super.parent = z;
+				else if (z->key < static_cast<node*>(y)->key)
+					y->left = z;
+				else
+					y->right = z;
+				z->left = NULL;
+				z->right = NULL;
+				z->color = red;
+				this->_size++;
+				insert_fixup(z);
+				update_super();
+				return (make_pair(iterator(z), true));
+			}
+		
+			void	insert_fixup(tree_node_base *z)
+			{
+				while (is_red(z->parent))
+				{
+					if (z->parent == z->parent->parent->left)
+					{
+						tree_node_base	*y = z->parent->parent->right;
+						if (is_red(y))
+						{
+							z->parent->color = black;
+							if (is_internal(y))
+								y->color = black;
+							z->parent->parent->color = red;
+							z = z->parent->parent;
+						}
+						else
+						{
+							if (z == z->parent->right)
+							{
+								z = z->parent;
+								left_rotate(z);
+							}
+							z->parent->color = black;
+							z->parent->parent->color = red;
+							right_rotate(z->parent->parent);
+						}
+					}
+					else
+					{
+						tree_node_base	*y = z->parent->parent->left;
+						if (is_red(y))
+						{
+							z->parent->color = black;
+							if (is_internal(y))
+								y->color = black;
+							z->parent->parent->color = red;
+							z = z->parent->parent;
+						}
+						else
+						{
+							if (z == z->parent->left)
+							{
+								z = z->parent;
+								right_rotate(z);
+							}
+							z->parent->color = black;
+							z->parent->parent->color = red;
+							left_rotate(z->parent->parent);
+						}
+					}
+				}
+				root()->color = black;
+			}
+		public:
+			void	erase(iterator position)
+			{
+				tree_node_base	*x;
+				tree_node_base	x_null;
+				tree_node_base	*z = position._node;
+				tree_node_base	*y = z;
+				color_type		y_old_color = y->color;
+				if (is_external(z->left))
+				{
+					if (is_external(x = z->right))
+						x = &x_null;
+					transplant(z, x);
+				}
+				else if (is_external(z->right))
+				{
+					if (is_external(x = z->left))
+						x = &x_null;
+					transplant(z, x);
+				}
+				else
+				{
+					y = successor(z);
+					y_old_color = y->color;
+					if (is_external(x = y->right))
+						x = &x_null;
+					if (y->parent == z)
+					{
+						y->right = x;
+						x->parent = y;
+					}
+					else
+					{
+						transplant(y, x);
+						y->right = z->right;
+						y->right->parent = y;
+					}
+					transplant(z, y);
+					y->left = z->left;
+					y->left->parent = y;
+					y->color = z->color;
+				}
+				destroy_node(z);
+				if (y_old_color == black)
+					erase_fixup(x);
+				if (x == &x_null)
+				{
+					if (x->parent->left == x)
+						x->parent->left = NULL;
+					else if (x->parent->right == x)
+						x->parent->right = NULL;
+				}
+				update_super();
+				this->_size--;
+			}
+		protected:
+			void	erase_fixup(tree_node_base *x)
+			{
+				while (x != root() and is_black(x))
+				{
+					if (x == x->parent->left)
+					{
+						tree_node_base	*w = x->parent->right;
+						if (is_red(w))
+						{
+							w->color = black;
+							x->parent->color = red;
+							left_rotate(x->parent);
+							w = x->parent->right;
+						}
+						if (is_black(w->left) and is_black(w->right))
+						{
+							w->color = red;
+							x = x->parent;
+						}
+						else
+						{
+							if (is_black(w->right))
+							{
+								w->left->color = black;
+								w->color = red;
+								right_rotate(w);
+								w = x->parent->right;
+							}
+							w->color = x->parent->color;
+							x->parent->color = black;
+							w->right->color = black;
+							left_rotate(x->parent);
+							x = root();	// to terminate the loop
+						}
+					}
+					else
+					{
+						tree_node_base	*w = x->parent->left;
+						if (is_red(w))
+						{
+							w->color = black;
+							x->parent->color = red;
+							right_rotate(x->parent);
+							w = x->parent->left;
+						}
+						if (is_black(w->right) and is_black(w->left))
+						{
+							w->color = red;
+							x = x->parent;
+						}
+						else
+						{
+							if (is_black(w->left))
+							{
+								w->right->color = black;
+								w->color = red;
+								left_rotate(w);
+								w = x->parent->left;
+							}
+							w->color = x->parent->color;
+							x->parent->color = black;
+							w->left->color = black;
+							right_rotate(x->parent);
+							x = root();	// to terminate the loop
+						}
+					}
+				}
+				x->color = black;
+			}
+		public:
+			void	print_node(const tree_node_base *root, int offset) const
+			{
+				if (is_external(root))
+					return ;
+				for (int i = 0; i < offset; i++)
+					std::cout << "  ";
+				std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->key;
+				if (root->parent)
+					std::cout << (root == root->parent->left ? "L" : "R");
+				if (is_internal(root))
+					std::cout << " ( " ;
+				std::cout << std::endl;
+				this->print_node(root->left, offset + 2);
+				this->print_node(root->right, offset + 2);
+				if (is_internal(root))
+				{
+					for (int i = 0; i < offset + 1; i++)
+						std::cout << "  ";
+					std::cout << ")" << std::endl;
+				}
+			}
+
+			void	print(void) const
+			{
+				if (this->empty())
+				{
+					std::cout << "(null)" << std::endl;
+					return ;
+				}
+				std::cout << "size: " << this->_size << std::endl;
+				this->print_node(root(), 0);
+			}
+
+			void	clear()
+			{
+				destroy_subtree(root());
+				this->_super.parent = NULL;
+				update_super();
+			}
 		protected:
 			tree_node_base	*root() const
 			{
@@ -458,60 +847,6 @@ namespace ft
 				y->parent = x;
 			}
 
-			void	insert_fixup(tree_node_base *z)
-			{
-				while (is_red(z->parent))
-				{
-					if (z->parent == z->parent->parent->left)
-					{
-						tree_node_base	*y = z->parent->parent->right;
-						if (is_red(y))
-						{
-							z->parent->color = black;
-							if (is_internal(y))
-								y->color = black;
-							z->parent->parent->color = red;
-							z = z->parent->parent;
-						}
-						else
-						{
-							if (z == z->parent->right)
-							{
-								z = z->parent;
-								left_rotate(z);
-							}
-							z->parent->color = black;
-							z->parent->parent->color = red;
-							right_rotate(z->parent->parent);
-						}
-					}
-					else
-					{
-						tree_node_base	*y = z->parent->parent->left;
-						if (is_red(y))
-						{
-							z->parent->color = black;
-							if (is_internal(y))
-								y->color = black;
-							z->parent->parent->color = red;
-							z = z->parent->parent;
-						}
-						else
-						{
-							if (z == z->parent->left)
-							{
-								z = z->parent;
-								right_rotate(z);
-							}
-							z->parent->color = black;
-							z->parent->parent->color = red;
-							left_rotate(z->parent->parent);
-						}
-					}
-				}
-				root()->color = black;
-			}
-
 			void	transplant(tree_node_base *u, tree_node_base *v)
 			{
 				if (is_root(u))
@@ -524,341 +859,6 @@ namespace ft
 					v->parent = u->parent;
 			}
 
-			void	erase_fixup(tree_node_base *x)
-			{
-				while (x != root() and is_black(x))
-				{
-					if (x == x->parent->left)
-					{
-						tree_node_base	*w = x->parent->right;
-						if (is_red(w))
-						{
-							w->color = black;
-							x->parent->color = red;
-							left_rotate(x->parent);
-							w = x->parent->right;
-						}
-						if (is_black(w->left) and is_black(w->right))
-						{
-							w->color = red;
-							x = x->parent;
-						}
-						else
-						{
-							if (is_black(w->right))
-							{
-								w->left->color = black;
-								w->color = red;
-								right_rotate(w);
-								w = x->parent->right;
-							}
-							w->color = x->parent->color;
-							x->parent->color = black;
-							w->right->color = black;
-							left_rotate(x->parent);
-							x = root();	// to terminate the loop
-						}
-					}
-					else
-					{
-						tree_node_base	*w = x->parent->left;
-						if (is_red(w))
-						{
-							w->color = black;
-							x->parent->color = red;
-							right_rotate(x->parent);
-							w = x->parent->left;
-						}
-						if (is_black(w->right) and is_black(w->left))
-						{
-							w->color = red;
-							x = x->parent;
-						}
-						else
-						{
-							if (is_black(w->left))
-							{
-								w->right->color = black;
-								w->color = red;
-								left_rotate(w);
-								w = x->parent->left;
-							}
-							w->color = x->parent->color;
-							x->parent->color = black;
-							w->left->color = black;
-							right_rotate(x->parent);
-							x = root();	// to terminate the loop
-						}
-					}
-				}
-				x->color = black;
-			}
-		public:
-			iterator	insert(iterator position, const value_type &val)
-			{
-				if (position == end())					// hint is end()
-				{
-					if (!empty() and this->_comp(*(--end()), val))	// hint accepted, i.e. val becomes maximum
-						return (hinted_insert((--position)._node, val)->first);
-					else											// hint rejected
-						return (hinted_insert(NULL, val)->first);
-				}
-				else if (this->_comp(val, *position))	// if inserted node is smaller than hint
-				{
-					// compare with predecessor
-					iterator	pred = position;
-					if (position == begin())				// hint is begin() and is a valid hint, new min destined
-						return (hinted_insert(position._node, val)->first);
-					else if (this->_comp(*(--pred), val))	// ensure dest. is in the same subtree
-						return (hinted_insert(position._node, val)->first);
-					else
-						return (hinted_insert(NULL, val)->first);
-				}
-				else if (this->_comp(*position, val))
-				{
-					// compare with successor
-					iterator	succ = position;
-					if (position == *(--end()))	// hint accepted, new maximum destined
-						return (hinted_insert(position._node, val)->first);
-					else if (this->_comp(val, *(++position)))	// ensure dest. is in the same subtree
-						return (hinted_insert(position._node, val)->first);
-					else
-						return (hinted_insert(NULL, val)->first);
-				}
-				else
-					return (hinted_insert(position._node, val)->first);	// else is equal to hint
-			}
-
-			pair<iterator, bool>	insert(const value_type &val)
-			{
-				return (hinted_insert(NULL, val));
-			}
-
-			template <class InputIterator>
-			void	insert(InputIterator first, InputIterator last)
-			{
-				iterator	hint;
-				for (; first != last; ++first)			// speeds up the process if
-					hint = insert(hint, *first)->first;	// elements are already sorted
-			}
-		protected:
-			pair<iterator, bool>	hinted_insert(tree_node_base *hint, const value_type &val)
-			{
-				tree_node_base	*y = NULL;						// the node at which the insertion will happen
-				tree_node_base	*x = (is_internal(hint) ? hint : root());	// take or not take the hint?
-				while (is_internal(x))
-				{
-					y = x;
-					if (this->_comp(val, static_cast<node*>(x)->key))
-						x = x->left;
-					else if (this->_comp(static_cast<node*>(x)->key, val))
-						x = x->right;
-					else	//equal
-						return (make_pair(iterator(x), false));
-				}
-				node	*z = create_node(val);
-				z->parent = y;
-				if (is_external(y))
-					this->_super.parent = z;
-				else if (z->key < static_cast<node*>(y)->key)
-					y->left = z;
-				else
-					y->right = z;
-				z->left = NULL;
-				z->right = NULL;
-				z->color = red;
-				this->_size++;
-				insert_fixup(z);
-				update_super();
-				return (make_pair(iterator(z), true));
-			}
-
-		public:
-			void	erase(iterator position)
-			{
-				tree_node_base	*x;
-				tree_node_base	x_null;
-				tree_node_base	*z = position._node;
-				tree_node_base	*y = z;
-				color_type		y_old_color = y->color;
-				if (is_external(z->left))
-				{
-					if (is_external(x = z->right))
-						x = &x_null;
-					transplant(z, x);
-				}
-				else if (is_external(z->right))
-				{
-					if (is_external(x = z->left))
-						x = &x_null;
-					transplant(z, x);
-				}
-				else
-				{
-					y = successor(z);
-					y_old_color = y->color;
-					if (is_external(x = y->right))
-						x = &x_null;
-					if (y->parent == z)
-					{
-						y->right = x;
-						x->parent = y;
-					}
-					else
-					{
-						transplant(y, x);
-						y->right = z->right;
-						y->right->parent = y;
-					}
-					transplant(z, y);
-					y->left = z->left;
-					y->left->parent = y;
-					y->color = z->color;
-				}
-				destroy_node(z);
-				if (y_old_color == black)
-					erase_fixup(x);
-				if (x == &x_null)
-				{
-					if (x->parent->left == x)
-						x->parent->left = NULL;
-					else if (x->parent->right == x)
-						x->parent->right = NULL;
-				}
-				update_super();
-				this->_size--;
-			}
-		public:
-			explicit rbtree(const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
-			{
-				update_super();
-			}
-
-			template <class InputIterator>
-			rbtree(InputIterator first, InputIterator last, const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
-			{
-				update_super();
-				insert(first, last);
-			}
-
-			rbtree(const rbtree &x) : _super(), _size(), _alloc(x._alloc), _comp(x._comp)
-			{
-				update_super();
-				insert(x.begin(), x.end());
-			}
-
-			~rbtree()
-			{
-				clear();
-			}
-
-			rbtree	&operator=(const rbtree &x)
-			{
-				clear();
-				insert(x.begin(), x.end());
-				return (*this);
-			}
-
-			// iterators
-			iterator	begin()
-			{
-				return (iterator(this->_super.right));
-			}
-
-			const_iterator	begin() const
-			{
-				return (const_iterator(this->_super.right));
-			}
-
-			iterator	end()
-			{
-				return (iterator(&this->_super));
-			}
-
-			const_iterator	end() const
-			{
-				return (const_iterator(&this->_super));
-			}
-
-			reverse_iterator	rbegin()
-			{
-				return (reverse_iterator(end()));
-			}
-
-			const_reverse_iterator	rbegin() const
-			{
-				return (const_reverse_iterator(end()));
-			}
-
-			reverse_iterator	rend()
-			{
-				return (reverse_iterator(begin()));
-			}
-
-			const_reverse_iterator	rend() const
-			{
-				return (const_reverse_iterator(begin()));
-			}
-
-			// capacity
-			bool		empty() const
-			{
-				return (!this->_size);
-			}
-			
-			size_type	size() const
-			{
-				return (this->_size);
-			}
-
-			size_type	max_size() const
-			{
-				return (this->_alloc.max_size());
-			}
-
-			// element access
-			// operator[] should be implemented in map
-
-			void	print_node(const tree_node_base *root, int offset) const
-			{
-				if (is_external(root))
-					return ;
-				for (int i = 0; i < offset; i++)
-					std::cout << "  ";
-				std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->key;
-				if (root->parent)
-					std::cout << (root == root->parent->left ? "L" : "R");
-				if (is_internal(root))
-					std::cout << " ( " ;
-				std::cout << std::endl;
-				this->print_node(root->left, offset + 2);
-				this->print_node(root->right, offset + 2);
-				if (is_internal(root))
-				{
-					for (int i = 0; i < offset + 1; i++)
-						std::cout << "  ";
-					std::cout << ")" << std::endl;
-				}
-			}
-
-			void	print(void) const
-			{
-				if (this->empty())
-				{
-					std::cout << "(null)" << std::endl;
-					return ;
-				}
-				std::cout << "size: " << this->_size << std::endl;
-				this->print_node(root(), 0);
-			}
-
-			void	clear()
-			{
-				destroy_subtree(root());
-				this->_super.parent = NULL;
-				update_super();
-			}
-		protected:
 			void	destroy_node(tree_node_base *x)
 			{
 				allocator_type	alloc(this->_alloc);
