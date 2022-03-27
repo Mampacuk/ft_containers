@@ -67,31 +67,31 @@ namespace ft
 
 		list_iterator	&operator++()
 		{
-			this->_node =  this->_node->next;
+			this->_node = this->_node->next;
 			return (*this);
 		}
 
 		list_iterator	operator++(int)
 		{
 			list_iterator	temp(*this);
-			this->_node = this->_node->next;
+			operator++();
 			return (temp);
 		}
 
 		list_iterator	&operator--()
 		{
-			this->_node =  this->_node->prev;
+			this->_node = this->_node->prev;
 			return (*this);
 		}
 
 		list_iterator	operator--(int)
 		{
 			list_iterator	temp(*this);
-			this->_node = this->_node->prev;
+			operator--();
 			return (temp);
 		}
 
-		pointer			operator->() const
+		pointer	operator->() const
 		{
 			return (addressof(operator*()));
 		}
@@ -135,36 +135,36 @@ namespace ft
 
 		list_const_iterator	&operator++()
 		{
-			this->_node =  this->_node->next;
+			this->_node = this->_node->next;
 			return (*this);
 		}
 
 		list_const_iterator	operator++(int)
 		{
 			list_const_iterator	temp(*this);
-			this->_node = this->_node->next;
+			operator++();
 			return (temp);
 		}
 		
 		list_const_iterator	&operator--()
 		{
-			this->_node =  this->_node->prev;
+			this->_node = this->_node->prev;
 			return (*this);
 		}
 
 		list_const_iterator	operator--(int)
 		{
 			list_const_iterator	temp(*this);
-			this->_node = this->_node->prev;
+			operator--();
 			return (temp);
 		}
 
-		reference			operator*() const
+		reference	operator*() const
 		{
 			return (static_cast<const list_node<T>*>(this->_node)->data);
 		}
 
-		pointer				operator->() const
+		pointer	operator->() const
 		{
 			return (addressof(operator*()));
 		}

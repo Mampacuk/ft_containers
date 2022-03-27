@@ -87,14 +87,14 @@ namespace ft
 			normal_iterator	operator++(int)
 			{
 				normal_iterator temp = *this;
-				this->_base++;
+				operator++();
 				return (temp);
 			}
 
 			normal_iterator	operator--(int)
 			{
 				normal_iterator temp = *this;
-				this->_base--;
+				operator--();
 				return (temp);
 			}
 

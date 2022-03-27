@@ -72,6 +72,35 @@ namespace ft
 				return (static_cast<tree_node<T>*>(this->_node)->key);
 			}
 
+			tree_iterator	&operator++()
+			{
+				if (this->_node->right)
+				{
+					this->_node = this->_node->right;
+					while (!is_super(this->_node) and this->_node->left and !is_super(this->_node->left))
+						this->_node = this->_node->left;
+				}
+				else
+				{
+					if (this->_node == this->_node->parent->left)
+						this->_node = this->_node->parent;
+					else
+					{
+						while (this->_node->parent->right == this->_node)
+							this->_node = this->_node->parent;
+						this->_node = this->_node->parent;
+					}
+				}
+				return (*this);
+			}
+
+			tree_iterator	operator++(int)
+			{
+				tree_iterator	temp(*this);
+				operator++();
+				return (temp);
+			}
+
 			tree_iterator	&operator--()
 			{
 				if (this->_node->left)
@@ -94,26 +123,16 @@ namespace ft
 				return (*this);
 			}
 
-			tree_iterator	&operator++()
+			tree_iterator	operator--(int)
 			{
-				if (this->_node->right)
-				{
-					this->_node = this->_node->right;
-					while (!is_super(this->_node) and this->_node->left and !is_super(this->_node->left))
-						this->_node = this->_node->left;
-				}
-				else
-				{
-					if (this->_node == this->_node->parent->left)
-						this->_node = this->_node->parent;
-					else
-					{
-						while (this->_node->parent->right == this->_node)
-							this->_node = this->_node->parent;
-						this->_node = this->_node->parent;
-					}
-				}
-				return (*this);
+				tree_iterator	temp(*this);
+				operator--();
+				return (temp);
+			}
+
+			pointer	operator->() const
+			{
+				return (addressof(operator*()));
 			}
 	};
 
@@ -146,7 +165,122 @@ namespace ft
 		tree_const_iterator(const tree_node_base *_node) : _node(_node) { }
 		tree_const_iterator(const iterator &copy) : _node(copy._node) { }
 		~tree_const_iterator() { }
+		protected:
+			bool	is_super(const tree_node_base *ptr)
+			{
+				return (ptr and ptr->right and ptr->right->left == ptr);
+			}
+		public:
+			tree_const_iterator	&operator=(const tree_iterator &rhs)
+			{
+				this->_node = rhs._node;
+				return (*this);
+			}
+
+			tree_const_iterator	&operator++()
+			{
+				if (this->_node->right)
+				{
+					this->_node = this->_node->right;
+					while (!is_super(this->_node) and this->_node->left and !is_super(this->_node->left))
+						this->_node = this->_node->left;
+				}
+				else
+				{
+					if (this->_node == this->_node->parent->left)
+						this->_node = this->_node->parent;
+					else
+					{
+						while (this->_node->parent->right == this->_node)
+							this->_node = this->_node->parent;
+						this->_node = this->_node->parent;
+					}
+				}
+				return (*this);
+			}
+
+			tree_const_iterator	operator++(int)
+			{
+				tree_const_iterator	temp(*this);
+				operator++();
+				return (temp);
+			}
+
+			tree_const_iterator	&operator--()
+			{
+				if (this->_node->left)
+				{
+					this->_node = this->_node->left;
+					while (!is_super(this->_node) and this->_node->right and !is_super(this->_node->right))
+						this->_node = this->_node->right;
+				}
+				else
+				{
+					if (this->_node == this->_node->parent->right)
+						this->_node = this->_node->parent;
+					else
+					{
+						while (this->_node->parent->left == this->_node)
+							this->_node = this->_node->parent;
+						this->_node = this->_node->parent;
+					}
+				}
+				return (*this);
+			}
+
+			tree_const_iterator	operator--(int)
+			{
+				tree_const_iterator	temp(*this);
+				operator--();
+				return (temp);
+			}
+
+			reference	operator*() const
+			{
+				return (static_cast<const tree_node<T>*>(this->_node)->key);
+			}
+
+			pointer	operator->() const
+			{
+				return (addressof(operator*()));
+			}
 	};
+
+	template <class T>
+	bool	operator==(const tree_const_iterator<T> &lhs, const tree_const_iterator<T> &rhs)
+	{
+		return (lhs._node == rhs._node);
+	}
+
+	template <class T>
+	bool	operator!=(const tree_const_iterator<T> &lhs, const tree_const_iterator<T> &rhs)
+	{
+		return (lhs._node != rhs._node);
+	}
+
+	template <class T>
+	bool	operator!=(const tree_iterator<T> &lhs, const tree_const_iterator<T> &rhs)
+	{
+		return (lhs._node != rhs._node);
+	}
+
+	template <class T>
+	bool	operator!=(const tree_const_iterator<T> &lhs, const tree_iterator<T> &rhs)
+	{
+		return (lhs._node != rhs._node);
+	}
+
+	template <class T>
+	bool	operator==(const tree_iterator<T> &lhs, const tree_const_iterator<T> &rhs)
+	{
+		return (lhs._node == rhs._node);
+	}
+
+	template <class T>
+	bool	operator==(const tree_const_iterator<T> &lhs, const tree_iterator<T> &rhs)
+	{
+		return (lhs._node == rhs._node);
+	}
 
 	template <class T, class Compare = less<T>, class Alloc = std::allocator<T> >
 	class	rbtree
@@ -165,7 +299,7 @@ namespace ft
 			typedef ptrdiff_t									difference_type;
 			typedef size_t										size_type;
 			typedef tree_iterator<value_type>					iterator;
-			typedef tree_iterator<value_type>					const_iterator;
+			typedef tree_const_iterator<value_type>				const_iterator;
 			typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 		private:
@@ -500,10 +634,17 @@ namespace ft
 				return (hinted_insert(NULL, val));
 			}
 
+			template <class InputIterator>
+			void	insert(InputIterator first, InputIterator last)
+			{
+				iterator	hint;
+				for (; first != last; ++first)			// speeds up the process if
+					hint = insert(hint, *first)->first;	// elements are already sorted
+			}
 		protected:
 			pair<iterator, bool>	hinted_insert(tree_node_base *hint, const value_type &val)
 			{
-				node			*y = NULL;						// the node at which the insertion will happen
+				tree_node_base	*y = NULL;						// the node at which the insertion will happen
 				tree_node_base	*x = (is_internal(hint) ? hint : root());	// take or not take the hint?
 				while (is_internal(x))
 				{
@@ -519,7 +660,7 @@ namespace ft
 				z->parent = y;
 				if (is_external(y))
 					this->_super.parent = z;
-				else if (z->key < y->key)
+				else if (z->key < static_cast<node*>(y)->key)
 					y->left = z;
 				else
 					y->right = z;
@@ -590,27 +731,32 @@ namespace ft
 		public:
 			explicit rbtree(const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
 			{
-				this->_super.left = &this->_super;
-				this->_super.right = &this->_super;
+				update_super();
 			}
 
 			template <class InputIterator>
 			rbtree(InputIterator first, InputIterator last, const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
 			{
-				this->_super.left = &this->_super;
-				this->_super.right = &this->_super;
-				for (; first != last; ++first)
-					insert(*first);
+				update_super();
+				insert(first, last);
 			}
 
-			bool		empty() const
+			rbtree(const rbtree &x) : _super(), _size(), _alloc(x._alloc), _comp(x._comp)
 			{
-				return (!this->_size);
+				update_super();
+				insert(x.begin(), x.end());
 			}
 
-			reference	root_val() const
+			~rbtree()
 			{
-				return (*iterator(root()));
+				clear();
+			}
+
+			rbtree	&operator=(const rbtree &x)
+			{
+				clear();
+				insert(x.begin(), x.end());
+				return (*this);
 			}
 
 			// iterators
@@ -619,10 +765,59 @@ namespace ft
 				return (iterator(this->_super.right));
 			}
 
+			const_iterator	begin() const
+			{
+				return (const_iterator(this->_super.right));
+			}
+
 			iterator	end()
 			{
 				return (iterator(&this->_super));
 			}
+
+			const_iterator	end() const
+			{
+				return (const_iterator(&this->_super));
+			}
+
+			reverse_iterator	rbegin()
+			{
+				return (reverse_iterator(end()));
+			}
+
+			const_reverse_iterator	rbegin() const
+			{
+				return (const_reverse_iterator(end()));
+			}
+
+			reverse_iterator	rend()
+			{
+				return (reverse_iterator(begin()));
+			}
+
+			const_reverse_iterator	rend() const
+			{
+				return (const_reverse_iterator(begin()));
+			}
+
+			// capacity
+			bool		empty() const
+			{
+				return (!this->_size);
+			}
+			
+			size_type	size() const
+			{
+				return (this->_size);
+			}
+
+			size_type	max_size() const
+			{
+				return (this->_alloc.max_size());
+			}
+
+			// element access
+			// operator[] should be implemented in map
 
 			void	print_node(const tree_node_base *root, int offset) const
 			{
@@ -656,12 +851,28 @@ namespace ft
 				std::cout << "size: " << this->_size << std::endl;
 				this->print_node(root(), 0);
 			}
+
+			void	clear()
+			{
+				destroy_subtree(root());
+				this->_super.parent = NULL;
+				update_super();
+			}
 		protected:
 			void	destroy_node(tree_node_base *x)
 			{
 				allocator_type	alloc(this->_alloc);
 				alloc.destroy(&static_cast<node*>(x)->key);
 				this->_alloc.deallocate(static_cast<node*>(x), 1);
+			}
+
+			void	destroy_subtree(tree_node_base *x)
+			{
+				if (is_external(x))
+					return ;
+				destroy_subtree(x->left);
+				destroy_subtree(x->right);
+				destroy_node(x);
 			}
 	};
 }
