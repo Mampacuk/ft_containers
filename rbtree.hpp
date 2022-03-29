@@ -171,7 +171,7 @@ namespace ft
 				return (ptr and ptr->right and ptr->right->left == ptr);
 			}
 		public:
-			tree_const_iterator	&operator=(const tree_iterator &rhs)
+			tree_const_iterator	&operator=(const iterator &rhs)
 			{
 				this->_node = rhs._node;
 				return (*this);
@@ -282,7 +282,8 @@ namespace ft
 		return (lhs._node == rhs._node);
 	}
 
-	template <class T, class Compare = less<T>, class Alloc = std::allocator<T> >
+	// Multi == true => multiset/multimap is implemented, Multi == false => set/multimap
+	template <class T, bool Multi, class Compare = less<T>, class Alloc = std::allocator<T> >
 	class	rbtree
 	{
 		protected:
@@ -396,8 +397,8 @@ namespace ft
 			}
 
 			// element access
-			// operator[] should be implemented in map
-
+			// operator[] should be implemented in map ADT
+			
 		public:
 			iterator	insert(iterator position, const value_type &val)
 			{
@@ -419,7 +420,7 @@ namespace ft
 					else
 						return (hinted_insert(NULL, val)->first);
 				}
-				else if (this->_comp(*position, val))
+				else if (this->_comp(*position, val))	// if inserted node is greater than hint
 				{
 					// compare with successor
 					iterator	succ = position;
@@ -459,7 +460,11 @@ namespace ft
 					else if (this->_comp(static_cast<node*>(x)->key, val))
 						x = x->right;
 					else	//equal
-						return (make_pair(iterator(x), false));
+					{
+						if (!Multi)	// if map/set, deny insertion, else continue
+							return (make_pair(iterator(x), false));
+						x = x->right;
+					}
 				}
 				node	*z = create_node(val);
 				z->parent = y;
@@ -532,6 +537,21 @@ namespace ft
 				root()->color = black;
 			}
 		public:
+			size_type	erase(const value_type &k)
+			{
+				iterator	low = lower_bound(k);
+				iterator	high = upper_bound(k);
+				size_type	deletions = ft::distance(low, high);
+				erase(low, high);
+				return (deletions);
+			}
+
+			void	erase(iterator first, iterator last)
+			{
+				for (; first != last)
+					erase(first++);
+			}
+
 			void	erase(iterator position)
 			{
 				tree_node_base	*x;
@@ -695,6 +715,21 @@ namespace ft
 				destroy_subtree(root());
 				this->_super.parent = NULL;
 				update_super();
+			}
+
+			// iterator	lower_bound(const value_type &k)
+			// {
+			// 	tree_node_base	*x = root();
+			// 	while (is_internal(x))
+			// 	{
+			// 		if (this->_comp(k, ))
+			// 	}
+			// }
+
+			const_iterator	lower_bound(const value_type &k) const
+			{
+				iterator	non_const = lower_bound(k);
+				return (const_iterator(non_const));
 			}
 		protected:
 			tree_node_base	*root() const

@@ -42,50 +42,54 @@ int A::num = 0;
 
 #define TESTED_NAMESPACE std
 
-int	main()
-{
-	TESTED_NAMESPACE::map<int, A>	map1;
+// int	main()
+// {
+// 	TESTED_NAMESPACE::map<int, A>	map1;
 
-	map1[1] = A("1");
-	std::cout << "1 inserted to map1" << std::endl;
-	map1[2] = A("2");
-	std::cout << "2 insterted to map1" << std::endl;
+// 	map1[1] = A("1");
+// 	std::cout << "1 inserted to map1" << std::endl;
+// 	map1[2] = A("2");
+// 	std::cout << "2 insterted to map1" << std::endl;
 
-	TESTED_NAMESPACE::map<int, A>	map2;
+// 	TESTED_NAMESPACE::map<int, A>	map2;
 
-	map2[1] = A("3");
-	map2[2] = A("3");
-	map2[3] = A("3");
-	map2[4] = A("3");
-	std::cout << "3 insterted to map2" << std::endl;
-	// map2[2] = A("1 again");
-	// std::cout << "1 insterted to map2, again" << std::endl;
-	map2 = map1;
-	std::cout << "maps assigned" << std::endl;
-}
-/*
+// 	map2[1] = A("3");
+// 	map2[2] = A("3");
+// 	map2[3] = A("3");
+// 	map2[4] = A("3");
+// 	std::cout << "3 insterted to map2" << std::endl;
+// 	// map2[2] = A("1 again");
+// 	// std::cout << "1 insterted to map2, again" << std::endl;
+// 	map2 = map1;
+// 	std::cout << "maps assigned" << std::endl;
+// }
+
 int		main(void)
 {
-	ft::rbtree<int>	tree;
-	tree.insert(5);
-	tree.insert(10);
+	ft::rbtree<int, true>	tree;
+	// tree.insert(5);
+	// tree.insert(5);
+	// tree.insert(5);
+	// tree.insert(5);
+	// tree.insert(5);
+	// tree.insert(5);
+	// tree.insert(10);
 	// std::cout << "begin == end? " << (tree.begin() == tree.end() ? "yes" : "no") << std::endl;
-	tree.insert(13);
-	tree.insert(79);
-	tree.insert(0);
-	tree.insert(15);
-	tree.insert(18);
+	// tree.insert(13);
+	// tree.insert(79);
+	// tree.insert(0);
+	// tree.insert(15);
+	// tree.insert(18);
 	tree.print();
-	std::cout << "deleting " << *(++tree.begin()) << std::endl;
-	tree.erase(++tree.begin());
-	tree.print();
+	// std::cout << "deleting " << *(++tree.begin()) << std::endl;
+	// tree.erase(++tree.begin());
+	// tree.print();
 
-	std::cout << "deleting " << *(++(++tree.begin())) << std::endl;
-	tree.erase(++(++tree.begin()));
-	tree.print();
+	// std::cout << "deleting " << *(++(++tree.begin())) << std::endl;
+	// tree.erase(++(++tree.begin()));
+	// tree.print();
 
-	std::cout << "deleting " << *(++(++(++tree.begin()))) << std::endl;
-	tree.erase(++(++(++tree.begin())));
-	tree.print();
+	// std::cout << "deleting " << *(++(++(++tree.begin()))) << std::endl;
+	// tree.erase(++(++(++tree.begin())));
+	// tree.print();
 }
-*/

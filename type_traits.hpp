@@ -22,7 +22,7 @@ namespace ft
 		struct enable_if<true, T> { typedef T type; };
 	
 	// integral_constant
-	template<class T, T v>
+	template <class T, T v>
 	struct integral_constant
 	{
 		typedef T value_type;
@@ -56,6 +56,15 @@ namespace ft
 	template <> struct is_integral<unsigned int> : true_type {};
 	template <> struct is_integral<unsigned long int> : true_type {};
 	template <> struct is_integral<unsigned long long int> : true_type {};
+
+	template <bool B, class T, class F>
+	struct conditional { typedef T type; };
+	
+	template <class T, class F>
+	struct conditional<false, T, F> { typedef F type; };
+
+	template <bool B, class T, class F>
+	typedef typename conditional<B, T, F>::type conditional_t;
 }
 
 #endif
