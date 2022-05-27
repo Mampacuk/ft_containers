@@ -457,7 +457,7 @@ namespace ft
 					y = x;
 					if (this->_comp(val, static_cast<node*>(x)->key))
 						x = x->left;
-					else if (this->_comp(static_cast<node*>(x)->key, val))
+				                   	else if (this->_comp(static_cast<node*>(x)->key, val))
 						x = x->right;
 					else	//equal
 					{
@@ -573,7 +573,7 @@ namespace ft
 				}
 				else
 				{
-					y = successor(z);
+					y = minimum(z->right);
 					y_old_color = y->color;
 					if (is_external(x = y->right))
 						x = &x_null;
@@ -717,14 +717,29 @@ namespace ft
 				update_super();
 			}
 
-			// iterator	lower_bound(const value_type &k)
-			// {
-			// 	tree_node_base	*x = root();
-			// 	while (is_internal(x))
-			// 	{
-			// 		if (this->_comp(k, ))
-			// 	}
-			// }
+			iterator	lower_bound(const value_type &k)
+			{
+				tree_node_base	*x = root();
+				while ()
+				if (is_external(x))
+					return (NULL);
+				if (this->_comp(k, static_cast<node*>(x)->key))
+					return (tree_search(x->left, k));
+				else if (this->_comp(static_cast<node*>(x)->key, k))
+					return (tree_search(x->right, k));
+				else	// exact match
+					return (x);
+				if (is_internal(x))
+					return (iterator(x));
+				while (!is_root(x))
+				{
+					if (x == x->parent->right)
+						return (iterator(x->parent));
+					else
+						x = x->parent;
+				}
+				return (end());
+			}
 
 			const_iterator	lower_bound(const value_type &k) const
 			{
@@ -801,36 +816,6 @@ namespace ft
 				return (ptr);
 			}
 
-			tree_node_base	*successor(tree_node_base *ptr) const
-			{
-				if (is_external(ptr))
-					return (NULL);
-				if (is_internal(ptr->right))
-					return (minimum(ptr->right));
-				tree_node_base	*y = ptr->parent;
-				while (is_internal(y) and ptr == y->right)
-				{
-					ptr = y;
-					y = y->parent;
-				}
-				return (y);
-			}
-
-			tree_node_base	*predecessor(tree_node_base *ptr) const
-			{
-				if (is_external(ptr))
-					return (NULL);
-				if (is_internal(ptr->left))
-					return (maximum(ptr->left));
-				tree_node_base	*y = ptr->parent;
-				while (is_internal(y) and ptr == y->left)
-				{
-					ptr = y;
-					y = y->parent;
-				}
-				return (y);
-			}
-
 			void	update_super()
 			{
 				tree_node_base	*min_node = minimum(root());
@@ -882,6 +867,8 @@ namespace ft
 				y->parent = x;
 			}
 
+			// establishes parent-child relationships between u's parent and v,
+			// effectively replacing u with v (does not relink u's children to v)
 			void	transplant(tree_node_base *u, tree_node_base *v)
 			{
 				if (is_root(u))
