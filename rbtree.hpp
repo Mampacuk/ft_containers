@@ -26,10 +26,20 @@ namespace ft
 	struct	tree_node_base
 	{
 		tree_node_base() : left(), right(), parent(), color(black) { }
+		tree_node_base(const tree_node_base &copy) : left(copy.left), right(copy.right), parent(copy.parent), color(copy.color) { }
 		tree_node_base	*left;
 		tree_node_base	*right;
 		tree_node_base	*parent;
 		color_type		color;
+
+		tree_node_base	&operator=(const tree_node_base &rhs)
+		{
+			this->left = rhs.left;
+			this->right = rhs.right;
+			this->parent = rhs.parent;
+			this->color = rhs.color;
+			return (*this);
+		}
 	};
 
 	template <class T>
@@ -443,8 +453,7 @@ namespace ft
 			template <class InputIterator>
 			void	insert(InputIterator first, InputIterator last)
 			{
-				iterator	hint;
-				for (; first != last; ++first)			// speeds up the process if
+				for (iterator hint; first != last; ++first)			// speeds up the process if
 					hint = insert(hint, *first)->first;	// elements are already sorted
 			}
 		protected:
@@ -457,7 +466,7 @@ namespace ft
 					y = x;
 					if (this->_comp(val, static_cast<node*>(x)->key))
 						x = x->left;
-				                   	else if (this->_comp(static_cast<node*>(x)->key, val))
+				    else if (this->_comp(static_cast<node*>(x)->key, val))
 						x = x->right;
 					else	//equal
 					{
@@ -548,14 +557,17 @@ namespace ft
 
 			void	erase(iterator first, iterator last)
 			{
-				for (; first != last)
-					erase(first++);
+				while (first != last)
+				{
+					iterator	erased = first++;
+					erase(erased);
+				}
 			}
 
 			void	erase(iterator position)
 			{
 				tree_node_base	*x;
-				tree_node_base	x_null;
+				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*z = position._node;
 				tree_node_base	*y = z;
 				color_type		y_old_color = y->color;
@@ -596,13 +608,14 @@ namespace ft
 				destroy_node(z);
 				if (y_old_color == black)
 					erase_fixup(x);
-				if (x == &x_null)
-				{
-					if (x->parent->left == x)
-						x->parent->left = NULL;
-					else if (x->parent->right == x)
-						x->parent->right = NULL;
-				}
+				// if (x == &x_null)	// fix the pointers before leaving
+				// {
+				// 	if (x->parent->left == x)
+				// 		x->parent->left = NULL;
+				// 	else if (x->parent->right == x)
+				// 		x->parent->right = NULL;
+				// } THIS WAS REPLACED BY THIS vvvvvv
+				nullify_leaf(&x_null);
 				update_super();
 				this->_size--;
 			}
@@ -717,34 +730,161 @@ namespace ft
 				update_super();
 			}
 
-			iterator	lower_bound(const value_type &k)
+			const_iterator	lower_bound(const value_type &k) const
 			{
+				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*x = root();
-				while ()
-				if (is_external(x))
-					return (NULL);
-				if (this->_comp(k, static_cast<node*>(x)->key))
-					return (tree_search(x->left, k));
-				else if (this->_comp(static_cast<node*>(x)->key, k))
-					return (tree_search(x->right, k));
-				else	// exact match
-					return (x);
-				if (is_internal(x))
-					return (iterator(x));
+				while (is_internal(x)) // walk down the tree to find a match
+				{
+					x_null.parent = x;
+					if (this->_comp(k, static_cast<node*>(x)->key))
+						x = x->left;
+					else if (this->_comp(static_cast<node*>(x)->key, k))
+						x = x->right;
+					else	// exact match
+					{		// get the leftmost one
+						const_iterator	pred = --const_iterator(x);
+						while (pred != end() and *pred == *const_iterator(x))
+						{
+							x = pred._node;
+							--pred;
+						}
+						return (const_iterator(x)); 
+					}
+				}
+				// if hit a null leaf, set up parent-child r-ships to climb up back later
+				x = &x_null;
+				if (this->_comp(k, static_cast<node*>(x->parent)->key))
+					x->parent->left = x;
+				else
+					x->parent->right = x;
 				while (!is_root(x))
 				{
-					if (x == x->parent->right)
-						return (iterator(x->parent));
+					if (x == x->parent->left)
+					{
+						nullify_leaf(&x_null);
+						return (const_iterator(x->parent));
+					}
 					else
 						x = x->parent;
+				}
+				nullify_leaf(&x_null); // undo the parent-child r-ships
+				return (end());
+			}
+
+			const_iterator	upper_bound(const value_type &k) const
+			{
+				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
+				tree_node_base	*x = root();
+				while (is_internal(x)) // walk down the tree to find a match
+				{
+					x_null.parent = x;
+					if (this->_comp(k, static_cast<node*>(x)->key))
+						x = x->left;
+					else if (this->_comp(static_cast<node*>(x)->key, k))
+						x = x->right;
+					else	// exact match
+					{		// get_next_value
+						const_iterator	succ = ++const_iterator(x);
+						while (succ != end() and *succ == *const_iterator(x))
+							++succ;
+						return (const_iterator(succ._node));
+					}
+				}
+				// if hit a null leaf, set up parent-child r-ships to climb up back later
+				x = &x_null;
+				if (this->_comp(k, static_cast<node*>(x->parent)->key))
+					x->parent->left = x;
+				else
+					x->parent->right = x;
+				while (!is_root(x))
+				{
+					if (x == x->parent->left)
+					{
+						nullify_leaf(&x_null);
+						return (const_iterator(x->parent));
+					}
+					else
+						x = x->parent;
+				}
+				nullify_leaf(&x_null); // undo the parent-child r-ships
+				return (end());
+			}
+
+			iterator	lower_bound(const value_type &k)
+			{
+				const_iterator	const_it = lower_bound(k);
+				return (iterator(const_it));
+			}
+
+			iterator	upper_bound(const value_type &k)
+			{
+				const_iterator	const_it = upper_bound(k);
+				return (iterator(const_it));
+			}
+
+			void	swap(rbtree &x)
+			{
+				ft::swap(this->_size, x._size);
+				ft::swap(this->_super, x._super);
+			}
+
+			value_compare	value_comp() const
+			{
+				return (this->_comp);
+			}
+
+			iterator	find(const key_type &k)
+			{
+				const_iterator	const_it = find(k);
+				return (iterator(const_it));
+			}
+
+			size_type	count(const key_type &k) const
+			{
+				return (ft::distance(lower_bound(k), upper_bound(k)));
+			}
+
+			const_iterator	find(const key_type &k) const
+			{
+				tree_node_base	*x = root();
+				while (is_internal(x))
+				{
+					if (this->_comp(k, static_cast<node*>(x)->key))
+						x = x->left;
+					else if (this->_comp(static_cast<node*>(x)->key, k))
+						x = x->right;
+					else	// exact match
+					{		// get the leftmost one
+						const_iterator	pred = --const_iterator(x);
+						while (pred != end() and *pred == *const_iterator(x))
+						{
+							x = pred._node;
+							--pred;
+						}
+						return (const_iterator(x)); 
+					}
 				}
 				return (end());
 			}
 
-			const_iterator	lower_bound(const value_type &k) const
+			pair<const_iterator, const_iterator>	equal_range(const key_type &k) const
 			{
-				iterator	non_const = lower_bound(k);
-				return (const_iterator(non_const));
+				const_iterator	low = lower_bound(k);
+				const_iterator	high = upper_bound(k);
+				return (ft::make_pair(low, high));
+			}
+
+			pair<iterator, iterator>	equal_range(const key_type &k)
+			{
+				iterator	low = lower_bound(k);
+				iterator	high = upper_bound(k);
+				return (ft::make_pair(low, high));
+			}
+
+			allocator_type	get_allocator() const
+			{
+				return (this->_alloc);
 			}
 		protected:
 			tree_node_base	*root() const
@@ -879,6 +1019,19 @@ namespace ft
 					u->parent->right = v;
 				if (is_internal(v))
 					v->parent = u->parent;
+			}
+
+			// when a stacked x_null node is used to emulate a NULL leaf, this function
+			// nullifies the leaf at x, if it was replaced by a stacked x_null
+			void	nullify_leaf(tree_node_base *x_null) const
+			{
+				if (x_null->parent)
+				{
+					if (x_null->parent->left == x_null)
+						x_null->parent->left = NULL;
+					else if (x_null->parent->right == x_null)
+						x_null->parent->right = NULL;
+				}
 			}
 
 			void	destroy_node(tree_node_base *x)

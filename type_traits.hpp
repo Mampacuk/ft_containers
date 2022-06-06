@@ -56,15 +56,6 @@ namespace ft
 	template <> struct is_integral<unsigned int> : true_type {};
 	template <> struct is_integral<unsigned long int> : true_type {};
 	template <> struct is_integral<unsigned long long int> : true_type {};
-
-	template <bool B, class T, class F>
-	struct conditional { typedef T type; };
-	
-	template <class T, class F>
-	struct conditional<false, T, F> { typedef F type; };
-
-	template <bool B, class T, class F>
-	typedef typename conditional<B, T, F>::type conditional_t;
 }
 
 #endif
