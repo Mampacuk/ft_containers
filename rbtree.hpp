@@ -303,7 +303,7 @@ namespace ft
 	template <class Key, class T, class KeyOfValue, bool Multi, class Compare = less<T>, class Alloc = std::allocator<T> >
 	class	rbtree
 	{
-		protected:
+		private:
 			typedef tree_node<T>									node;
 			typedef typename Alloc::template rebind<node>::other	node_allocator_type;
 		public:
@@ -427,7 +427,7 @@ namespace ft
 					else											// hint rejected
 						return (hinted_insert(NULL, val).first);
 				}
-				else if (this->_comp(extract_key()(val), extract_key(position)))	// if inserted node is smaller than hint
+				else if (this->_comp(extract_key(val), extract_key(position)))	// if inserted node is smaller than hint
 				{
 					// compare with predecessor
 					iterator	pred = position;
@@ -751,8 +751,8 @@ namespace ft
 						x = x->right;
 					else	// exact match
 					{		// get the leftmost one
-						const_iterator	pred = --const_iterator(x);
-						while (pred != end() and *pred == *const_iterator(x))
+						iterator	pred = --iterator(x);
+						while (pred != end() and *pred == *iterator(x))
 						{
 							x = pred._node;
 							--pred;
@@ -821,14 +821,14 @@ namespace ft
 
 			iterator	lower_bound(const key_type &k)
 			{
-				const_iterator	const_it = lower_bound(k);
-				return (iterator(const_cast<node*>(const_it._node)));
+				const_iterator	const_it = static_cast<const rbtree&>(*this).lower_bound(k);
+				return (iterator(const_cast<tree_node_base*>(const_it._node)));
 			}
 
 			iterator	upper_bound(const key_type &k)
 			{
-				const_iterator	const_it = upper_bound(k);
-				return (iterator(const_cast<node*>(const_it._node)));
+				const_iterator	const_it = static_cast<const rbtree&>(*this).upper_bound(k);
+				return (iterator(const_cast<tree_node_base*>(const_it._node)));
 			}
 
 			void	swap(rbtree &x)
@@ -885,9 +885,9 @@ namespace ft
 
 			pair<iterator, iterator>	equal_range(const key_type &k)
 			{
-				iterator	low = lower_bound(k);
-				iterator	high = upper_bound(k);
-				return (ft::make_pair(low, high));
+				pair<const_iterator, const_iterator> const_range = static_cast<const rbtree&>(*this).equal_range(k);
+				return (ft::make_pair(iterator(const_cast<tree_node_base*>(const_range.first._node)),
+					iterator(const_cast<tree_node_base*>(const_range.second._node))));
 			}
 
 			allocator_type	get_allocator() const
@@ -917,7 +917,7 @@ namespace ft
 
 			const key_type	&extract_key(const_iterator it) const
 			{
-				return (extract_key(it._node));
+				return (extract_key(static_cast<const node*>(it._node)));
 			}
 
 			// key_type	&extract_key(const_iterator it)
