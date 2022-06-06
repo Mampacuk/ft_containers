@@ -312,7 +312,7 @@ namespace ft
 	template <class It, class Distance>
 	void	advance(It &it, Distance n)
 	{
-		do_advance(it, typename std::iterator_traits<It>::difference_type(n), typename iterator_traits<It>::iterator_category());
+		do_advance(it, typename iterator_traits<It>::difference_type(n), typename iterator_traits<It>::iterator_category());
 	}
 }
 

@@ -33,33 +33,31 @@ namespace ft
 			typedef T									mapped_type;
 			typedef pair<const key_type, mapped_type>	value_type;
 			typedef Compare								key_compare;
+			typedef Alloc								allocator_type;
 
-			class	value_compare
+			class	value_compare : public binary_function<value_type, value_type, bool>
 			{
-					friend class map;
+					friend class map<key_type, value_type, key_compare, allocator_type>;
 				protected:
 					key_compare	_comp;
 					value_compare(key_compare c) : _comp(c) { }
 				public:
-					typedef bool		result_type;
-					typedef value_type	first_argument_type;
-					typedef value_type	second_argument_type;
-					result_type	operator()(const first_argument_type &x, const second_argument_type &y) const
+					bool	operator()(const value_type &x, const value_type &y) const
 					{
 						return (this->_comp(x.first, y.first));
 					}
 			};
-
-			typedef Alloc												allocator_type;
-			typedef typename allocator_type::reference					reference;
-			typedef typename allocator_type::const_reference			const_reference;
-			typedef typename allocator_type::pointer					pointer;
-			typedef typename allocator_type::const_pointer				const_pointer;
+		private:
+			typedef typename Alloc::template rebind<value_type>::other	pair_allocator_type;
+			typedef rbtree<key_type, value_type, select_1st<value_type>,
+				false, key_compare, pair_allocator_type>	tree;
+		public:
+			typedef typename pair_allocator_type::reference				reference;
+			typedef typename pair_allocator_type::const_reference		const_reference;
+			typedef typename pair_allocator_type::pointer				pointer;
+			typedef typename pair_allocator_type::const_pointer			const_pointer;
 			typedef ptrdiff_t											difference_type;
 			typedef size_t												size_type;
-		protected:
-			typedef rbtree<value_type, false, value_compare, allocator_type>	tree;
-		public:
 			typedef typename tree::iterator								iterator;
 			typedef typename tree::const_iterator						const_iterator;
 			typedef typename tree::reverse_iterator						reverse_iterator;
@@ -191,12 +189,12 @@ namespace ft
 
 			key_compare	key_comp() const
 			{
-				return (this->_tree.value_comp()._comp);
+				return (this->_tree.key_comp());
 			}
 
 			value_compare	value_comp() const
 			{
-				return (this->_tree.value_comp());
+				return (value_compare(key_comp()));
 			}
 
 			iterator	find(const key_type &k)

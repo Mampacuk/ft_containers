@@ -21,6 +21,7 @@ std::ostream	&operator<<(std::ostream &o, const A &a)
 
 int A::num = 0;
 ```
+*	Non-`const` member functions with their `const` counterparts should be implemented via the `const` version by applying `const_cast<>`.
 ## Vector
 ### Allocator
 *	Should be used to allocate memory and construct.

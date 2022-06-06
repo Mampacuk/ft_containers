@@ -52,7 +52,7 @@ namespace ft
 	template <class T>
 	struct	tree_node : public tree_node_base
 	{
-		T	key;
+		T	data;
 	};
 
 	// map iterators
@@ -86,7 +86,7 @@ namespace ft
 
 			reference	operator*() const
 			{
-				return (static_cast<tree_node<T>*>(this->_node)->key);
+				return (static_cast<tree_node<T>*>(this->_node)->data);
 			}
 
 			tree_iterator	&operator++()
@@ -254,7 +254,7 @@ namespace ft
 
 			reference	operator*() const
 			{
-				return (static_cast<const tree_node<T>*>(this->_node)->key);
+				return (static_cast<const tree_node<T>*>(this->_node)->data);
 			}
 
 			pointer	operator->() const
@@ -300,20 +300,21 @@ namespace ft
 	}
 
 	// Multi == true => multiset/multimap is implemented, Multi == false => set/map
-	template <class T, bool Multi, class Compare = less<T>, class Alloc = std::allocator<T> >
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare = less<T>, class Alloc = std::allocator<T> >
 	class	rbtree
 	{
 		protected:
 			typedef tree_node<T>									node;
 			typedef typename Alloc::template rebind<node>::other	node_allocator_type;
 		public:
+			typedef Key											key_type;
 			typedef T											value_type;
-			typedef Compare										value_compare;
+			typedef Compare										key_compare;
 			typedef Alloc										allocator_type;
-			typedef typename allocator_type::reference			reference;
-			typedef typename allocator_type::const_reference	const_reference;
-			typedef typename allocator_type::pointer			pointer;
-			typedef typename allocator_type::const_pointer		const_pointer;
+			typedef value_type&									reference;
+			typedef const value_type&							const_reference;
+			typedef	value_type*									pointer;
+			typedef const value_type*							const_pointer;
 			typedef ptrdiff_t									difference_type;
 			typedef size_t										size_type;
 			typedef tree_iterator<value_type>					iterator;
@@ -324,15 +325,15 @@ namespace ft
 			tree_node_base		_super;
 			size_type			_size;
 			node_allocator_type	_alloc;
-			value_compare		_comp;
+			key_compare			_comp;
 		public:
-			explicit rbtree(const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
+			explicit rbtree(const key_compare &comp = key_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
 			{
 				update_super();
 			}
 
 			template <class InputIterator>
-			rbtree(InputIterator first, InputIterator last, const value_compare &comp = value_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
+			rbtree(InputIterator first, InputIterator last, const key_compare &comp = key_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
 			{
 				update_super();
 				insert(first, last);
@@ -421,35 +422,35 @@ namespace ft
 			{
 				if (position == end())					// hint is end()
 				{
-					if (!empty() and this->_comp(*(--end()), val))	// hint accepted, i.e. val becomes maximum
-						return (hinted_insert((--position)._node, val)->first);
+					if (!empty() and this->_comp(extract_key(--end()), extract_key(val)))	// hint accepted, i.e. val becomes maximum
+						return (hinted_insert((--position)._node, val).first);
 					else											// hint rejected
-						return (hinted_insert(NULL, val)->first);
+						return (hinted_insert(NULL, val).first);
 				}
-				else if (this->_comp(val, *position))	// if inserted node is smaller than hint
+				else if (this->_comp(extract_key()(val), extract_key(position)))	// if inserted node is smaller than hint
 				{
 					// compare with predecessor
 					iterator	pred = position;
 					if (position == begin())				// hint is begin() and is a valid hint, new min destined
-						return (hinted_insert(position._node, val)->first);
-					else if (this->_comp(*(--pred), val))	// ensure dest. is in the same subtree
-						return (hinted_insert(position._node, val)->first);
+						return (hinted_insert(position._node, val).first);
+					else if (this->_comp(extract_key(--pred), extract_key(val)))	// ensure dest. is in the same subtree
+						return (hinted_insert(position._node, val).first);
 					else
-						return (hinted_insert(NULL, val)->first);
+						return (hinted_insert(NULL, val).first);
 				}
-				else if (this->_comp(*position, val))	// if inserted node is greater than hint
+				else if (this->_comp(extract_key(position), extract_key(val)))	// if inserted node is greater than hint
 				{
 					// compare with successor
 					iterator	succ = position;
-					if (position == *(--end()))	// hint accepted, new maximum destined
-						return (hinted_insert(position._node, val)->first);
-					else if (this->_comp(val, *(++position)))	// ensure dest. is in the same subtree
-						return (hinted_insert(position._node, val)->first);
+					if (position == --end())				// hint accepted, new maximum destined
+						return (hinted_insert(position._node, val).first);
+					else if (this->_comp(extract_key(val), extract_key(++position)))	// ensure dest. is in the same subtree
+						return (hinted_insert(position._node, val).first);
 					else
-						return (hinted_insert(NULL, val)->first);
+						return (hinted_insert(NULL, val).first);
 				}
 				else
-					return (hinted_insert(position._node, val)->first);	// else is equal to hint
+					return (hinted_insert(position._node, val).first);	// else is equal to hint
 			}
 
 			pair<iterator, bool>	insert(const value_type &val)
@@ -460,8 +461,8 @@ namespace ft
 			template <class InputIterator>
 			void	insert(InputIterator first, InputIterator last)
 			{
-				for (iterator hint; first != last; ++first)			// speeds up the process if
-					hint = insert(hint, *first)->first;	// elements are already sorted
+				for (iterator hint = end(); first != last; ++first)	// speeds up the process if
+					hint = insert(hint, *first);			// elements are already sorted
 			}
 		protected:
 			pair<iterator, bool>	hinted_insert(tree_node_base *hint, const value_type &val)
@@ -471,9 +472,9 @@ namespace ft
 				while (is_internal(x))
 				{
 					y = x;
-					if (this->_comp(val, static_cast<node*>(x)->key))
+					if (this->_comp(extract_key(val), extract_key(static_cast<node*>(x))))
 						x = x->left;
-				    else if (this->_comp(static_cast<node*>(x)->key, val))
+				    else if (this->_comp(extract_key(static_cast<node*>(x)), extract_key(val)))
 						x = x->right;
 					else	//equal
 					{
@@ -486,7 +487,7 @@ namespace ft
 				z->parent = y;
 				if (is_external(y))
 					this->_super.parent = z;
-				else if (z->key < static_cast<node*>(y)->key)
+				else if (z->data < static_cast<node*>(y)->data)
 					y->left = z;
 				else
 					y->right = z;
@@ -703,7 +704,7 @@ namespace ft
 					return ;
 				for (int i = 0; i < offset; i++)
 					std::cout << "  ";
-				std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->key;
+				std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->data;
 				if (root->parent)
 					std::cout << (root == root->parent->left ? "L" : "R");
 				if (is_internal(root))
@@ -737,31 +738,31 @@ namespace ft
 				update_super();
 			}
 
-			iterator	lower_bound(const value_type &k)
+			const_iterator	lower_bound(const key_type &k) const
 			{
 				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*x = root();
 				while (is_internal(x)) // walk down the tree to find a match
 				{
 					x_null.parent = x;
-					if (this->_comp(k, static_cast<node*>(x)->key))
+					if (this->_comp(k, extract_key(static_cast<node*>(x))))
 						x = x->left;
-					else if (this->_comp(static_cast<node*>(x)->key, k))
+					else if (this->_comp(extract_key(static_cast<node*>(x)), k))
 						x = x->right;
 					else	// exact match
 					{		// get the leftmost one
-						iterator	pred = --iterator(x);
+						const_iterator	pred = --const_iterator(x);
 						while (pred != end() and *pred == *const_iterator(x))
 						{
 							x = pred._node;
 							--pred;
 						}
-						return (iterator(x)); 
+						return (const_iterator(x)); 
 					}
 				}
 				// if hit a null leaf, set up parent-child r-ships to climb up back later
 				x = &x_null;
-				if (this->_comp(k, static_cast<node*>(x->parent)->key))
+				if (this->_comp(k, extract_key(static_cast<node*>(x->parent))))
 					x->parent->left = x;
 				else
 					x->parent->right = x;
@@ -770,7 +771,7 @@ namespace ft
 					if (x == x->parent->left)
 					{
 						nullify_leaf(&x_null);
-						return (iterator(x->parent));
+						return (const_iterator(x->parent));
 					}
 					else
 						x = x->parent;
@@ -779,28 +780,28 @@ namespace ft
 				return (end());
 			}
 
-			iterator	upper_bound(const value_type &k)
+			const_iterator	upper_bound(const key_type &k) const
 			{
 				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*x = root();
 				while (is_internal(x)) // walk down the tree to find a match
 				{
 					x_null.parent = x;
-					if (this->_comp(k, static_cast<node*>(x)->key))
+					if (this->_comp(k, extract_key(static_cast<node*>(x))))
 						x = x->left;
-					else if (this->_comp(static_cast<node*>(x)->key, k))
+					else if (this->_comp(extract_key(static_cast<node*>(x)), k))
 						x = x->right;
 					else	// exact match
 					{		// get_next_value
-						iterator	succ = ++iterator(x);
+						const_iterator	succ = ++const_iterator(x);
 						while (succ != end() and *succ == *const_iterator(x))
 							++succ;
-						return (iterator(succ._node));
+						return (const_iterator(succ._node));
 					}
 				}
 				// if hit a null leaf, set up parent-child r-ships to climb up back later
 				x = &x_null;
-				if (this->_comp(k, static_cast<node*>(x->parent)->key))
+				if (this->_comp(k, extract_key(static_cast<node*>(x->parent))))
 					x->parent->left = x;
 				else
 					x->parent->right = x;
@@ -809,7 +810,7 @@ namespace ft
 					if (x == x->parent->left)
 					{
 						nullify_leaf(&x_null);
-						return (iterator(x->parent));
+						return (const_iterator(x->parent));
 					}
 					else
 						x = x->parent;
@@ -818,16 +819,16 @@ namespace ft
 				return (end());
 			}
 
-			const_iterator	lower_bound(const value_type &k) const
+			iterator	lower_bound(const key_type &k)
 			{
-				iterator	non_const = lower_bound(k);
-				return (const_iterator(non_const));
+				const_iterator	const_it = lower_bound(k);
+				return (iterator(const_cast<node*>(const_it._node)));
 			}
 
-			const_iterator	upper_bound(const value_type &k) const
+			iterator	upper_bound(const key_type &k)
 			{
-				iterator	non_const = upper_bound(k);
-				return (const_iterator(non_const));
+				const_iterator	const_it = upper_bound(k);
+				return (iterator(const_cast<node*>(const_it._node)));
 			}
 
 			void	swap(rbtree &x)
@@ -836,30 +837,30 @@ namespace ft
 				ft::swap(this->_super, x._super);
 			}
 
-			value_compare	value_comp() const
+			key_compare	key_comp() const
 			{
 				return (this->_comp);
 			}
 
-			iterator	find(const value_type &k)
+			iterator	find(const key_type &k)
 			{
 				const_iterator	const_it = find(k);
 				return (iterator(const_it));
 			}
 
-			size_type	count(const value_type &k) const
+			size_type	count(const key_type &k) const
 			{
 				return (ft::distance(lower_bound(k), upper_bound(k)));
 			}
 
-			const_iterator	find(const value_type &k) const
+			const_iterator	find(const key_type &k) const
 			{
 				tree_node_base	*x = root();
 				while (is_internal(x))
 				{
-					if (this->_comp(k, static_cast<node*>(x)->key))
+					if (this->_comp(k, extract_key(static_cast<node*>(x))))
 						x = x->left;
-					else if (this->_comp(static_cast<node*>(x)->key, k))
+					else if (this->_comp(extract_key(static_cast<node*>(x)), k))
 						x = x->right;
 					else	// exact match
 					{		// get the leftmost one
@@ -875,14 +876,14 @@ namespace ft
 				return (end());
 			}
 
-			pair<const_iterator, const_iterator>	equal_range(const value_type &k) const
+			pair<const_iterator, const_iterator>	equal_range(const key_type &k) const
 			{
 				const_iterator	low = lower_bound(k);
 				const_iterator	high = upper_bound(k);
 				return (ft::make_pair(low, high));
 			}
 
-			pair<iterator, iterator>	equal_range(const value_type &k)
+			pair<iterator, iterator>	equal_range(const key_type &k)
 			{
 				iterator	low = lower_bound(k);
 				iterator	high = upper_bound(k);
@@ -894,6 +895,36 @@ namespace ft
 				return (this->_alloc);
 			}
 		protected:
+			const key_type	&extract_key(const value_type &val) const
+			{
+				return (KeyOfValue()(val));
+			}
+
+			const key_type	&extract_key(const node *ptr) const
+			{
+				return (extract_key(ptr->data));
+			}
+
+			// key_type	&extract_key(node *ptr)
+			// {
+			// 	return (KeyOfValue()(ptr->data));
+			// }
+
+			// key_type	&extract_key(const value_type &val)
+			// {
+			// 	return (KeyOfValue()(val));
+			// }
+
+			const key_type	&extract_key(const_iterator it) const
+			{
+				return (extract_key(it._node));
+			}
+
+			// key_type	&extract_key(const_iterator it)
+			// {
+			// 	return (KeyOfValue()(val));
+			// }
+
 			tree_node_base	*root() const
 			{
 				return (this->_super.parent);
@@ -935,7 +966,7 @@ namespace ft
 				try
 				{
 					allocator_type	alloc(this->_alloc);
-					alloc.construct(&new_node->key, val);
+					alloc.construct(&new_node->data, val);
 				}
 				catch (...)
 				{
@@ -1044,7 +1075,7 @@ namespace ft
 			void	destroy_node(tree_node_base *x)
 			{
 				allocator_type	alloc(this->_alloc);
-				alloc.destroy(&static_cast<node*>(x)->key);
+				alloc.destroy(&static_cast<node*>(x)->data);
 				this->_alloc.deallocate(static_cast<node*>(x), 1);
 			}
 

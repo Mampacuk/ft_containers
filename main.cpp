@@ -18,6 +18,7 @@
 #include "rbtree.hpp"
 #include "vector.hpp"
 #include "map.hpp"
+#include "functional.hpp"
 
 struct A
 {
@@ -52,13 +53,13 @@ int		main(void)
 
 	// TESTED_NAMESPACE::vector<A>	a(10);
 	// TESTED_NAMESPACE::vector<A>	b(10, A());
-	// ft::rbtree<int, true>	tree;
+	// ft::rbtree<int, int, ft::identity<int>, true>	tree;
 
 	// tree.insert(ft::make_pair(1, 5));
 	// tree.insert(ft::make_pair(1, 5));
-	// tree.insert(ft::make_pair(1, 5));
+	tree.insert(ft::make_pair(1, 5));
 	// tree.insert(5);
-	// tree.insert(ft::make_pair(2, 5));
+	tree.insert(ft::make_pair(2, 5));
 	// tree.insert(5);
 	// tree.insert(5);
 	// tree.insert(10);
@@ -67,7 +68,7 @@ int		main(void)
 	// tree.insert(0);
 	// tree.insert(15);
 	// tree.insert(18);
-	// tree.get_tree().print();
+	tree.get_tree().print();
 
 	// ft::rbtree<int, true>::iterator itlow = tree.lower_bound(5);
 
