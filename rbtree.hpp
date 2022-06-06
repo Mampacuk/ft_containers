@@ -14,9 +14,16 @@
 # define RBTREE_HPP
 
 # include "functional.hpp"
+# include "algorithm.hpp"
 # include "memory.hpp"
 # include "utility.hpp"
 # include "iterator.hpp"
+
+// std::ostream	&operator<<(std::ostream &o, const ft::pair<int, int> &a)
+// {
+// 	o << "{" << a.first << ";" << a.second << "}";
+// 	return (o);
+// }
 
 namespace ft
 {
@@ -292,7 +299,7 @@ namespace ft
 		return (lhs._node == rhs._node);
 	}
 
-	// Multi == true => multiset/multimap is implemented, Multi == false => set/multimap
+	// Multi == true => multiset/multimap is implemented, Multi == false => set/map
 	template <class T, bool Multi, class Compare = less<T>, class Alloc = std::allocator<T> >
 	class	rbtree
 	{
@@ -391,7 +398,7 @@ namespace ft
 			}
 
 			// capacity
-			bool		empty() const
+			bool	empty() const
 			{
 				return (!this->_size);
 			}
@@ -730,7 +737,7 @@ namespace ft
 				update_super();
 			}
 
-			const_iterator	lower_bound(const value_type &k) const
+			iterator	lower_bound(const value_type &k)
 			{
 				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*x = root();
@@ -743,13 +750,13 @@ namespace ft
 						x = x->right;
 					else	// exact match
 					{		// get the leftmost one
-						const_iterator	pred = --const_iterator(x);
+						iterator	pred = --iterator(x);
 						while (pred != end() and *pred == *const_iterator(x))
 						{
 							x = pred._node;
 							--pred;
 						}
-						return (const_iterator(x)); 
+						return (iterator(x)); 
 					}
 				}
 				// if hit a null leaf, set up parent-child r-ships to climb up back later
@@ -763,7 +770,7 @@ namespace ft
 					if (x == x->parent->left)
 					{
 						nullify_leaf(&x_null);
-						return (const_iterator(x->parent));
+						return (iterator(x->parent));
 					}
 					else
 						x = x->parent;
@@ -772,7 +779,7 @@ namespace ft
 				return (end());
 			}
 
-			const_iterator	upper_bound(const value_type &k) const
+			iterator	upper_bound(const value_type &k)
 			{
 				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*x = root();
@@ -785,10 +792,10 @@ namespace ft
 						x = x->right;
 					else	// exact match
 					{		// get_next_value
-						const_iterator	succ = ++const_iterator(x);
+						iterator	succ = ++iterator(x);
 						while (succ != end() and *succ == *const_iterator(x))
 							++succ;
-						return (const_iterator(succ._node));
+						return (iterator(succ._node));
 					}
 				}
 				// if hit a null leaf, set up parent-child r-ships to climb up back later
@@ -802,7 +809,7 @@ namespace ft
 					if (x == x->parent->left)
 					{
 						nullify_leaf(&x_null);
-						return (const_iterator(x->parent));
+						return (iterator(x->parent));
 					}
 					else
 						x = x->parent;
@@ -811,16 +818,16 @@ namespace ft
 				return (end());
 			}
 
-			iterator	lower_bound(const value_type &k)
+			const_iterator	lower_bound(const value_type &k) const
 			{
-				const_iterator	const_it = lower_bound(k);
-				return (iterator(const_it));
+				iterator	non_const = lower_bound(k);
+				return (const_iterator(non_const));
 			}
 
-			iterator	upper_bound(const value_type &k)
+			const_iterator	upper_bound(const value_type &k) const
 			{
-				const_iterator	const_it = upper_bound(k);
-				return (iterator(const_it));
+				iterator	non_const = upper_bound(k);
+				return (const_iterator(non_const));
 			}
 
 			void	swap(rbtree &x)
@@ -834,18 +841,18 @@ namespace ft
 				return (this->_comp);
 			}
 
-			iterator	find(const key_type &k)
+			iterator	find(const value_type &k)
 			{
 				const_iterator	const_it = find(k);
 				return (iterator(const_it));
 			}
 
-			size_type	count(const key_type &k) const
+			size_type	count(const value_type &k) const
 			{
 				return (ft::distance(lower_bound(k), upper_bound(k)));
 			}
 
-			const_iterator	find(const key_type &k) const
+			const_iterator	find(const value_type &k) const
 			{
 				tree_node_base	*x = root();
 				while (is_internal(x))
@@ -868,14 +875,14 @@ namespace ft
 				return (end());
 			}
 
-			pair<const_iterator, const_iterator>	equal_range(const key_type &k) const
+			pair<const_iterator, const_iterator>	equal_range(const value_type &k) const
 			{
 				const_iterator	low = lower_bound(k);
 				const_iterator	high = upper_bound(k);
 				return (ft::make_pair(low, high));
 			}
 
-			pair<iterator, iterator>	equal_range(const key_type &k)
+			pair<iterator, iterator>	equal_range(const value_type &k)
 			{
 				iterator	low = lower_bound(k);
 				iterator	high = upper_bound(k);

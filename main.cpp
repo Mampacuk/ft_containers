@@ -14,8 +14,10 @@
 #include <deque>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include "rbtree.hpp"
 #include "vector.hpp"
+#include "map.hpp"
 
 struct A
 {
@@ -43,26 +45,36 @@ int A::num = 0;
 
 #define TESTED_NAMESPACE ft
 
+
 int		main(void)
 {
-	TESTED_NAMESPACE::vector<A>	a(10);
-	TESTED_NAMESPACE::vector<A>	b(10, A());
+	ft::map<int, int>	tree;
+
+	// TESTED_NAMESPACE::vector<A>	a(10);
+	// TESTED_NAMESPACE::vector<A>	b(10, A());
 	// ft::rbtree<int, true>	tree;
 
+	// tree.insert(ft::make_pair(1, 5));
+	// tree.insert(ft::make_pair(1, 5));
+	// tree.insert(ft::make_pair(1, 5));
 	// tree.insert(5);
-	// tree.insert(5);
-	// tree.insert(5);
-	// tree.insert(5);
+	// tree.insert(ft::make_pair(2, 5));
 	// tree.insert(5);
 	// tree.insert(5);
 	// tree.insert(10);
-	// std::cout << "begin == end? " << (tree.begin() == tree.end() ? "yes" : "no") << std::endl;
 	// tree.insert(13);
 	// tree.insert(79);
 	// tree.insert(0);
 	// tree.insert(15);
 	// tree.insert(18);
-	// tree.print();
+	// tree.get_tree().print();
+
+	// ft::rbtree<int, true>::iterator itlow = tree.lower_bound(5);
+
+	// ft::pair<ft::rbtree<int, true>::iterator, ft::rbtree<int, true>::iterator> range = tree.equal_range(5);
+
+	// for (; range.first != range.second; ++range.first)
+	// 	std::cout << *range.first << std::endl;
 	// std::cout << "deleting " << *(++tree.begin()) << std::endl;
 	// tree.erase(++tree.begin());
 	// tree.print();
