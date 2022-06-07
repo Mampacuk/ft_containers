@@ -19,13 +19,6 @@
 # include "utility.hpp"
 # include "iterator.hpp"
 
-template <typename T1, typename T2>
-std::ostream	&operator<<(std::ostream &o, const ft::pair<T1, T2> &a)
-{
-	o << "{" << a.first << ";" << a.second << "}";
-	return (o);
-}
-
 namespace ft
 {
 	// util structures for rbtree
@@ -95,15 +88,6 @@ namespace ft
 				if (this->_node->right)
 				{
 					this->_node = this->_node->right;
-					// std::cout << "|" << this->_node << "|";
-					// std::cout << "<";
-					// if (this->_node)
-					// {
-					// 	std::cout << !is_super(this->_node);
-					// 	if (this->_node->left)
-					// 		std::cout << (this->_node->left != 0) << !is_super(this->_node->left);
-					// }
-					// std::cout << ">";
 					while (!is_super(this->_node) and this->_node->left and !is_super(this->_node->left))
 						this->_node = this->_node->left;
 				}
@@ -317,20 +301,20 @@ namespace ft
 			typedef tree_node<T>									node;
 			typedef typename Alloc::template rebind<node>::other	node_allocator_type;
 		public:
-			typedef Key											key_type;
-			typedef T											value_type;
-			typedef Compare										key_compare;
-			typedef Alloc										allocator_type;
-			typedef value_type&									reference;
-			typedef const value_type&							const_reference;
-			typedef	value_type*									pointer;
-			typedef const value_type*							const_pointer;
-			typedef ptrdiff_t									difference_type;
-			typedef size_t										size_type;
-			typedef tree_iterator<value_type>					iterator;
-			typedef tree_const_iterator<value_type>				const_iterator;
-			typedef ft::reverse_iterator<iterator>				reverse_iterator;
-			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
+			typedef Key										key_type;
+			typedef T										value_type;
+			typedef Compare									key_compare;
+			typedef Alloc									allocator_type;
+			typedef value_type&								reference;
+			typedef const value_type&						const_reference;
+			typedef	value_type*								pointer;
+			typedef const value_type*						const_pointer;
+			typedef ptrdiff_t								difference_type;
+			typedef size_t									size_type;
+			typedef tree_iterator<value_type>				iterator;
+			typedef tree_const_iterator<value_type>			const_iterator;
+			typedef ft::reverse_iterator<iterator>			reverse_iterator;
+			typedef ft::reverse_iterator<const_iterator>	const_reverse_iterator;
 		private:
 			tree_node_base		_super;
 			size_type			_size;
@@ -423,10 +407,6 @@ namespace ft
 			{
 				return (this->_alloc.max_size());
 			}
-
-			// element access
-			// operator[] should be implemented in map ADT
-			
 		public:
 			iterator	insert(iterator position, const value_type &val)
 			{
@@ -497,7 +477,7 @@ namespace ft
 				z->parent = y;
 				if (is_external(y))
 					this->_super.parent = z;
-				else if (z->data < static_cast<node*>(y)->data)
+				else if (this->_comp(extract_key(z), extract_key(static_cast<node*>(y))))
 					y->left = z;
 				else
 					y->right = z;
@@ -772,13 +752,13 @@ namespace ft
 				if (this->_comp(k, extract_key(static_cast<node*>(x->parent))))
 				{
 					if (is_super(x->parent->left))
-						x->color = red;
+						x->color = red;	// red signifies that a superleaf was replaced
 					x->parent->left = x;
 				}
 				else
 				{
 					if (is_super(x->parent->right))
-						x->color = red;
+						x->color = red;	// red signifies that a superleaf was replaced
 					x->parent->right = x;
 				}
 				while (!is_root(x))
@@ -820,13 +800,13 @@ namespace ft
 				if (this->_comp(k, extract_key(static_cast<node*>(x->parent))))
 				{
 					if (is_super(x->parent->left))
-						x->color = red;
+						x->color = red;	// red signifies that a superleaf was replaced
 					x->parent->left = x;
 				}
 				else
 				{
 					if (is_super(x->parent->right))
-						x->color = red;
+						x->color = red;	// red signifies that a superleaf was replaced
 					x->parent->right = x;
 				}
 				while (!is_root(x))
@@ -857,8 +837,11 @@ namespace ft
 
 			void	swap(rbtree &x)
 			{
-				ft::swap(this->_size, x._size);
+				// update superroot and min and max nodes' pointers
+				ft::swap(this->_super.left->right, x._super.left->right);
+				ft::swap(this->_super.right->left, x._super.right->left);
 				ft::swap(this->_super, x._super);
+				ft::swap(this->_size, x._size);
 			}
 
 			key_compare	key_comp() const
@@ -919,8 +902,7 @@ namespace ft
 			{
 				return (this->_alloc);
 			}
-		// protected:
-		public:
+		protected:
 			const key_type	&extract_key(const value_type &val) const
 			{
 				return (KeyOfValue()(val));
@@ -1109,6 +1091,48 @@ namespace ft
 				destroy_node(x);
 			}
 	};
+
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare, class Alloc>
+	void	swap(const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &x, const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &y)
+	{
+		x.swap(y);
+	}
+
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare, class Alloc>
+	bool operator==(const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &lhs, const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &rhs)
+	{
+		return (lhs.size() == rhs.size() and ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
+	}
+
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare, class Alloc>
+	bool operator!=(const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &lhs, const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &rhs)
+	{
+		return (!(lhs == rhs));
+	}
+
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare, class Alloc>
+	bool operator<(const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &lhs, const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &rhs)
+	{
+		return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+	}
+	
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare, class Alloc>
+	bool operator<=(const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &lhs, const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &rhs)
+	{
+		return (!(rhs < lhs));
+	}
+
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare, class Alloc>
+	bool operator>(const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &lhs, const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &rhs)
+	{
+		return (rhs < lhs);
+	}
+
+	template <class Key, class T, class KeyOfValue, bool Multi, class Compare, class Alloc>
+	bool operator>=(const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &lhs, const rbtree<Key, T, KeyOfValue, Multi, Compare, Alloc> &rhs)
+	{
+		return (!(lhs < rhs));
+	}
 }
 
 #endif
