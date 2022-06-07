@@ -40,8 +40,8 @@ namespace ft
 					friend class map<key_type, value_type, key_compare, allocator_type>;
 				protected:
 					key_compare	_comp;
-					value_compare(key_compare c) : _comp(c) { }
 				public:
+					value_compare(key_compare c) : _comp(c) { }
 					bool	operator()(const value_type &x, const value_type &y) const
 					{
 						return (this->_comp(x.first, y.first));
@@ -80,6 +80,7 @@ namespace ft
 			map	&operator=(const map &x)
 			{
 				this->_tree = x._tree;
+				return (*this);
 			}
 
 			// iterators

@@ -19,11 +19,12 @@
 # include "utility.hpp"
 # include "iterator.hpp"
 
-// std::ostream	&operator<<(std::ostream &o, const ft::pair<int, int> &a)
-// {
-// 	o << "{" << a.first << ";" << a.second << "}";
-// 	return (o);
-// }
+template <typename T1, typename T2>
+std::ostream	&operator<<(std::ostream &o, const ft::pair<T1, T2> &a)
+{
+	o << "{" << a.first << ";" << a.second << "}";
+	return (o);
+}
 
 namespace ft
 {
@@ -75,7 +76,7 @@ namespace ft
 		protected:
 			bool	is_super(tree_node_base *ptr)
 			{
-				return (ptr and ptr->right and ptr->right->left == ptr);
+				return (ptr and ptr->right and ptr->right->left == ptr and ptr->left and ptr->left->right == ptr);
 			}
 		public:
 			tree_iterator	&operator=(const tree_iterator &rhs)
@@ -94,6 +95,15 @@ namespace ft
 				if (this->_node->right)
 				{
 					this->_node = this->_node->right;
+					// std::cout << "|" << this->_node << "|";
+					// std::cout << "<";
+					// if (this->_node)
+					// {
+					// 	std::cout << !is_super(this->_node);
+					// 	if (this->_node->left)
+					// 		std::cout << (this->_node->left != 0) << !is_super(this->_node->left);
+					// }
+					// std::cout << ">";
 					while (!is_super(this->_node) and this->_node->left and !is_super(this->_node->left))
 						this->_node = this->_node->left;
 				}
@@ -185,7 +195,7 @@ namespace ft
 		protected:
 			bool	is_super(const tree_node_base *ptr)
 			{
-				return (ptr and ptr->right and ptr->right->left == ptr);
+				return (ptr and ptr->right and ptr->right->left == ptr and ptr->left and ptr->left->right == ptr);
 			}
 		public:
 			tree_const_iterator	&operator=(const iterator &rhs)
@@ -479,7 +489,7 @@ namespace ft
 					else	//equal
 					{
 						if (!Multi)	// if map/set, deny insertion, else continue
-							return (make_pair(iterator(x), false));
+							return (ft::make_pair(iterator(x), false));
 						x = x->right;
 					}
 				}
@@ -497,7 +507,7 @@ namespace ft
 				this->_size++;
 				insert_fixup(z);
 				update_super();
-				return (make_pair(iterator(z), true));
+				return (ft::make_pair(iterator(z), true));
 			}
 		
 			void	insert_fixup(tree_node_base *z)
@@ -554,22 +564,23 @@ namespace ft
 				root()->color = black;
 			}
 		public:
-			size_type	erase(const value_type &k)
+			size_type	erase(const key_type &k)
 			{
 				iterator	low = lower_bound(k);
 				iterator	high = upper_bound(k);
-				size_type	deletions = ft::distance(low, high);
-				erase(low, high);
+				size_type	deletions = 0;
+				while (low != high)
+				{
+					erase(low++);
+					deletions++;
+				}
 				return (deletions);
 			}
 
 			void	erase(iterator first, iterator last)
 			{
 				while (first != last)
-				{
-					iterator	erased = first++;
-					erase(erased);
-				}
+					erase(first++);
 			}
 
 			void	erase(iterator position)
@@ -616,16 +627,10 @@ namespace ft
 				destroy_node(z);
 				if (y_old_color == black)
 					erase_fixup(x);
-				// if (x == &x_null)	// fix the pointers before leaving
-				// {
-				// 	if (x->parent->left == x)
-				// 		x->parent->left = NULL;
-				// 	else if (x->parent->right == x)
-				// 		x->parent->right = NULL;
-				// } THIS WAS REPLACED BY THIS vvvvvv
 				nullify_leaf(&x_null);
+				if (!(--this->_size))
+					this->_super.parent = NULL;
 				update_super();
-				this->_size--;
 			}
 		protected:
 			void	erase_fixup(tree_node_base *x)
@@ -734,6 +739,7 @@ namespace ft
 			void	clear()
 			{
 				destroy_subtree(root());
+				this->_size = 0;
 				this->_super.parent = NULL;
 				update_super();
 			}
@@ -752,7 +758,8 @@ namespace ft
 					else	// exact match
 					{		// get the leftmost one
 						iterator	pred = --iterator(x);
-						while (pred != end() and *pred == *iterator(x))
+						while (pred != end() and !this->_comp(extract_key(pred), extract_key(iterator(x)))
+							and !this->_comp(extract_key(iterator(x)), extract_key(pred)))
 						{
 							x = pred._node;
 							--pred;
@@ -763,9 +770,17 @@ namespace ft
 				// if hit a null leaf, set up parent-child r-ships to climb up back later
 				x = &x_null;
 				if (this->_comp(k, extract_key(static_cast<node*>(x->parent))))
+				{
+					if (is_super(x->parent->left))
+						x->color = red;
 					x->parent->left = x;
+				}
 				else
+				{
+					if (is_super(x->parent->right))
+						x->color = red;
 					x->parent->right = x;
+				}
 				while (!is_root(x))
 				{
 					if (x == x->parent->left)
@@ -794,7 +809,8 @@ namespace ft
 					else	// exact match
 					{		// get_next_value
 						const_iterator	succ = ++const_iterator(x);
-						while (succ != end() and *succ == *const_iterator(x))
+						while (succ != end() and !this->_comp(extract_key(succ), extract_key(iterator(x)))
+							and !this->_comp(extract_key(iterator(x)), extract_key(succ)))
 							++succ;
 						return (const_iterator(succ._node));
 					}
@@ -802,9 +818,17 @@ namespace ft
 				// if hit a null leaf, set up parent-child r-ships to climb up back later
 				x = &x_null;
 				if (this->_comp(k, extract_key(static_cast<node*>(x->parent))))
+				{
+					if (is_super(x->parent->left))
+						x->color = red;
 					x->parent->left = x;
+				}
 				else
+				{
+					if (is_super(x->parent->right))
+						x->color = red;
 					x->parent->right = x;
+				}
 				while (!is_root(x))
 				{
 					if (x == x->parent->left)
@@ -844,8 +868,8 @@ namespace ft
 
 			iterator	find(const key_type &k)
 			{
-				const_iterator	const_it = find(k);
-				return (iterator(const_it));
+				const_iterator	const_it = static_cast<const rbtree&>(*this).find(k);
+				return (iterator(const_cast<tree_node_base*>(const_it._node)));
 			}
 
 			size_type	count(const key_type &k) const
@@ -864,8 +888,9 @@ namespace ft
 						x = x->right;
 					else	// exact match
 					{		// get the leftmost one
-						const_iterator	pred = --const_iterator(x);
-						while (pred != end() and *pred == *const_iterator(x))
+						iterator	pred = --iterator(x);
+						while (pred != end() and !this->_comp(extract_key(pred), extract_key(iterator(x)))
+							and !this->_comp(extract_key(iterator(x)), extract_key(pred)))
 						{
 							x = pred._node;
 							--pred;
@@ -894,7 +919,8 @@ namespace ft
 			{
 				return (this->_alloc);
 			}
-		protected:
+		// protected:
+		public:
 			const key_type	&extract_key(const value_type &val) const
 			{
 				return (KeyOfValue()(val));
@@ -905,25 +931,10 @@ namespace ft
 				return (extract_key(ptr->data));
 			}
 
-			// key_type	&extract_key(node *ptr)
-			// {
-			// 	return (KeyOfValue()(ptr->data));
-			// }
-
-			// key_type	&extract_key(const value_type &val)
-			// {
-			// 	return (KeyOfValue()(val));
-			// }
-
 			const key_type	&extract_key(const_iterator it) const
 			{
 				return (extract_key(static_cast<const node*>(it._node)));
 			}
-
-			// key_type	&extract_key(const_iterator it)
-			// {
-			// 	return (KeyOfValue()(val));
-			// }
 
 			tree_node_base	*root() const
 			{
@@ -1066,9 +1077,19 @@ namespace ft
 				if (x_null->parent)
 				{
 					if (x_null->parent->left == x_null)
-						x_null->parent->left = NULL;
+					{
+						if (is_red(x_null))	// x_null replaced a super pointer
+							x_null->parent->left = const_cast<tree_node_base*>(&this->_super);
+						else
+							x_null->parent->left = NULL;
+					}
 					else if (x_null->parent->right == x_null)
-						x_null->parent->right = NULL;
+					{
+						if (is_red(x_null))	// x_null replaced a super pointer
+							x_null->parent->right = const_cast<tree_node_base*>(&this->_super);
+						else
+							x_null->parent->right = NULL;
+					}
 				}
 			}
 
