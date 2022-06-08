@@ -698,7 +698,7 @@ namespace ft
 				}
 				x->color = black;
 			}
-		public:
+
 			void	print_node(const tree_node_base *root, int offset) const
 			{
 				if (is_external(root))
@@ -720,7 +720,7 @@ namespace ft
 					std::cout << ")" << std::endl;
 				}
 			}
-
+		public:
 			void	print(void) const
 			{
 				if (this->empty())
