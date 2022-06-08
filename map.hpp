@@ -13,10 +13,7 @@
 #ifndef MAP_HPP
 # define MAP_HPP
 
-# include "functional.hpp"
-# include "memory.hpp"
 # include "utility.hpp"
-# include "iterator.hpp"
 # include "rbtree.hpp"
 
 namespace ft

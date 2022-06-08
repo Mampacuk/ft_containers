@@ -16,7 +16,6 @@
 # include "functional.hpp"
 # include "algorithm.hpp"
 # include "memory.hpp"
-# include "utility.hpp"
 # include "iterator.hpp"
 
 namespace ft
@@ -408,6 +407,11 @@ namespace ft
 				return (this->_alloc.max_size());
 			}
 		public:
+			iterator	insert(const_iterator position, const value_type &val)
+			{
+				return (insert(iterator(const_cast<tree_node_base*>(position._node)), val));
+			}
+
 			iterator	insert(iterator position, const value_type &val)
 			{
 				if (position == end())					// hint is end()
@@ -557,10 +561,22 @@ namespace ft
 				return (deletions);
 			}
 
+			// for set, multiset
+			void	erase(const_iterator first, const_iterator last)
+			{
+				erase(iterator(const_cast<tree_node_base*>(first._node)), iterator(const_cast<tree_node_base*>(last._node)));
+			}
+
 			void	erase(iterator first, iterator last)
 			{
 				while (first != last)
 					erase(first++);
+			}
+
+			// for set, multiset
+			void	erase(const_iterator position)
+			{
+				erase(iterator(const_cast<tree_node_base*>(position._node)));
 			}
 
 			void	erase(iterator position)
