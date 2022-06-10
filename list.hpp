@@ -38,63 +38,78 @@ namespace ft
 
 	// list iterators
 	template <class T>
-	struct	list_iterator
+	class	list_const_iterator;
+	
+	template <class T>
+	class	list_iterator
 	{
-		// member variables
-		list_node_base							*_node;
-		// member types
-		typedef T								value_type;
-		typedef ptrdiff_t						difference_type;
-		typedef T&								reference;
-		typedef T*								pointer;
-		typedef std::bidirectional_iterator_tag	iterator_category;
+		private:
+			template <class T1, class Alloc1>
+			friend class list;
+			template <class T1>
+			friend bool operator==(const list_iterator<T1> &lhs, const list_iterator<T1> &rhs);
+			template <class T1>
+			friend class list_const_iterator;
+			template <class T1>
+			friend bool operator==(const list_iterator<T1> &lhs, const list_const_iterator<T1> &rhs);
+			template <class T1>
+			friend bool operator==(const list_const_iterator<T1> &lhs, const list_iterator<T1> &rhs);
+			// member variables
+			list_node_base							*_node;
+		public:
+			// member types
+			typedef T								value_type;
+			typedef ptrdiff_t						difference_type;
+			typedef T&								reference;
+			typedef T*								pointer;
+			typedef std::bidirectional_iterator_tag	iterator_category;
 		
-		list_iterator() : _node() { }
-		list_iterator(list_node_base *_node) : _node(_node) { }
-		list_iterator(const list_iterator &copy) : _node(copy._node) { }
-		~list_iterator() { }
+			list_iterator() : _node() { }
+			list_iterator(list_node_base *_node) : _node(_node) { }
+			list_iterator(const list_iterator &copy) : _node(copy._node) { }
+			~list_iterator() { }
 
-		list_iterator	&operator=(const list_iterator &rhs)
-		{
-			this->_node = rhs._node;
-			return (*this);
-		}
+			list_iterator	&operator=(const list_iterator &rhs)
+			{
+				this->_node = rhs._node;
+				return (*this);
+			}
 
-		reference	operator*() const
-		{
-			return (static_cast<list_node<T>*>(this->_node)->data);
-		}
+			reference	operator*() const
+			{
+				return (static_cast<list_node<T>*>(this->_node)->data);
+			}
 
-		list_iterator	&operator++()
-		{
-			this->_node = this->_node->next;
-			return (*this);
-		}
+			list_iterator	&operator++()
+			{
+				this->_node = this->_node->next;
+				return (*this);
+			}
 
-		list_iterator	operator++(int)
-		{
-			list_iterator	temp(*this);
-			operator++();
-			return (temp);
-		}
+			list_iterator	operator++(int)
+			{
+				list_iterator	temp(*this);
+				operator++();
+				return (temp);
+			}
 
-		list_iterator	&operator--()
-		{
-			this->_node = this->_node->prev;
-			return (*this);
-		}
+			list_iterator	&operator--()
+			{
+				this->_node = this->_node->prev;
+				return (*this);
+			}
 
-		list_iterator	operator--(int)
-		{
-			list_iterator	temp(*this);
-			operator--();
-			return (temp);
-		}
+			list_iterator	operator--(int)
+			{
+				list_iterator	temp(*this);
+				operator--();
+				return (temp);
+			}
 
-		pointer	operator->() const
-		{
-			return (addressof(operator*()));
-		}
+			pointer	operator->() const
+			{
+				return (addressof(operator*()));
+			}
 	};
 
 	template <class T>
@@ -106,68 +121,78 @@ namespace ft
 	template <class T>
 	bool	operator!=(const list_iterator<T> &lhs, const list_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>
-	struct	list_const_iterator
+	class	list_const_iterator
 	{
-		// member variables
-		const list_node_base					*_node;
-		// member types
-		typedef list_iterator<T>				iterator;
-		typedef T								value_type;
-		typedef ptrdiff_t						difference_type;
-		typedef const T&						reference;
-		typedef const T*						pointer;
-		typedef std::bidirectional_iterator_tag	iterator_category;
-		
-		list_const_iterator() : _node() { }
-		list_const_iterator(const list_node_base *_node) : _node(_node) { }
-		list_const_iterator(const iterator &copy) : _node(copy._node) { }
-		~list_const_iterator() { }
-		
-		list_const_iterator	&operator=(const list_const_iterator &rhs)
-		{
-			this->_node = rhs._node;
-			return (*this);
-		}
+		private:
+			template <class T1, class Alloc1>
+			friend class list;
+			template <class T1>
+			friend bool operator==(const list_const_iterator<T1> &lhs, const list_const_iterator<T1> &rhs);
+			template <class T1>
+			friend bool operator==(const list_iterator<T1> &lhs, const list_const_iterator<T1> &rhs);
+			template <class T1>
+			friend bool operator==(const list_const_iterator<T1> &lhs, const list_iterator<T1> &rhs);
+			// member variables
+			const list_node_base					*_node;
+		public:
+			// member types
+			typedef list_iterator<T>				iterator;
+			typedef T								value_type;
+			typedef ptrdiff_t						difference_type;
+			typedef const T&						reference;
+			typedef const T*						pointer;
+			typedef std::bidirectional_iterator_tag	iterator_category;
+			
+			list_const_iterator() : _node() { }
+			list_const_iterator(const list_node_base *_node) : _node(_node) { }
+			list_const_iterator(const iterator &copy) : _node(copy._node) { }
+			~list_const_iterator() { }
+			
+			list_const_iterator	&operator=(const list_const_iterator &rhs)
+			{
+				this->_node = rhs._node;
+				return (*this);
+			}
 
-		list_const_iterator	&operator++()
-		{
-			this->_node = this->_node->next;
-			return (*this);
-		}
+			list_const_iterator	&operator++()
+			{
+				this->_node = this->_node->next;
+				return (*this);
+			}
 
-		list_const_iterator	operator++(int)
-		{
-			list_const_iterator	temp(*this);
-			operator++();
-			return (temp);
-		}
-		
-		list_const_iterator	&operator--()
-		{
-			this->_node = this->_node->prev;
-			return (*this);
-		}
+			list_const_iterator	operator++(int)
+			{
+				list_const_iterator	temp(*this);
+				operator++();
+				return (temp);
+			}
+			
+			list_const_iterator	&operator--()
+			{
+				this->_node = this->_node->prev;
+				return (*this);
+			}
 
-		list_const_iterator	operator--(int)
-		{
-			list_const_iterator	temp(*this);
-			operator--();
-			return (temp);
-		}
+			list_const_iterator	operator--(int)
+			{
+				list_const_iterator	temp(*this);
+				operator--();
+				return (temp);
+			}
 
-		reference	operator*() const
-		{
-			return (static_cast<const list_node<T>*>(this->_node)->data);
-		}
+			reference	operator*() const
+			{
+				return (static_cast<const list_node<T>*>(this->_node)->data);
+			}
 
-		pointer	operator->() const
-		{
-			return (addressof(operator*()));
-		}
+			pointer	operator->() const
+			{
+				return (addressof(operator*()));
+			}
 	};
 
 	template <class T>
@@ -179,19 +204,19 @@ namespace ft
 	template <class T>
 	bool	operator!=(const list_const_iterator<T> &lhs, const list_const_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>
 	bool	operator!=(const list_iterator<T> &lhs, const list_const_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>
 	bool	operator!=(const list_const_iterator<T> &lhs, const list_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>

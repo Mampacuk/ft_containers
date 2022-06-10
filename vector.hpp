@@ -51,13 +51,13 @@ namespace ft
 				return (this->_base);
 			}
 
-			normal_iterator		&operator=(const normal_iterator &rhs)
+			normal_iterator	&operator=(const normal_iterator &rhs)
 			{
 				this->_base = rhs._base;
 				return (*this);
 			}
 
-			reference operator*() const
+			reference	operator*() const
 			{
 				return (*this->_base);
 			}
@@ -72,7 +72,7 @@ namespace ft
 				return (normal_iterator(this->_base - n));
 			}
 
-			normal_iterator &operator++()
+			normal_iterator	&operator++()
 			{
 				this->_base++;
 				return (*this);
