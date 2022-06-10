@@ -50,10 +50,25 @@ namespace ft
 
 	// map iterators
 	template <class T>
-	struct	tree_iterator
+	class	tree_const_iterator;
+	
+	template <class T>
+	class	tree_iterator
 	{
+		private:
+			template <class K1, class T1, class KOV1, bool M1, class C1, class A1>
+			friend class rbtree;
+			template <class T1>
+			friend bool operator==(const tree_iterator<T1> &lhs, const tree_iterator<T1> &rhs);
+			template <class T1>
+			friend class tree_const_iterator;
+			template <class T1>
+			friend bool operator==(const tree_iterator<T1> &lhs, const tree_const_iterator<T1> &rhs);
+			template <class T1>
+			friend bool operator==(const tree_const_iterator<T1> &lhs, const tree_iterator<T1> &rhs);
 			// member variables
 			tree_node_base							*_node;
+		public:
 			// member types
 			typedef T								value_type;
 			typedef ptrdiff_t						difference_type;
@@ -65,6 +80,7 @@ namespace ft
 			tree_iterator(tree_node_base *_node) : _node(_node) { }
 			tree_iterator(const tree_iterator &copy) : _node(copy._node) { }
 			~tree_iterator() { }
+		
 		protected:
 			bool	is_super(tree_node_base *ptr)
 			{
@@ -155,26 +171,37 @@ namespace ft
 	template <class T>
 	bool	operator!=(const tree_iterator<T> &lhs, const tree_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>
-	struct	tree_const_iterator
+	class	tree_const_iterator
 	{
-		// member variables
-		const tree_node_base					*_node;
-		// member types
-		typedef tree_iterator<T>				iterator;
-		typedef T								value_type;
-		typedef ptrdiff_t						difference_type;
-		typedef const T&						reference;
-		typedef const T*						pointer;
-		typedef std::bidirectional_iterator_tag	iterator_category;
-		
-		tree_const_iterator() : _node() { }
-		tree_const_iterator(const tree_node_base *_node) : _node(_node) { }
-		tree_const_iterator(const iterator &copy) : _node(copy._node) { }
-		~tree_const_iterator() { }
+		private:
+			template <class K1, class T1, class KOV1, bool M1, class C1, class A1>
+			friend class rbtree;
+			template <class T1>
+			friend bool operator==(const tree_const_iterator<T1> &lhs, const tree_const_iterator<T1> &rhs);
+			template <class T1>
+			friend bool operator==(const tree_iterator<T1> &lhs, const tree_const_iterator<T1> &rhs);
+			template <class T1>
+			friend bool operator==(const tree_const_iterator<T1> &lhs, const tree_iterator<T1> &rhs);
+			// member variables
+			const tree_node_base					*_node;
+		public:
+			// member types
+			typedef tree_iterator<T>				iterator;
+			typedef T								value_type;
+			typedef ptrdiff_t						difference_type;
+			typedef const T&						reference;
+			typedef const T*						pointer;
+			typedef std::bidirectional_iterator_tag	iterator_category;
+			
+			tree_const_iterator() : _node() { }
+			tree_const_iterator(const tree_node_base *_node) : _node(_node) { }
+			tree_const_iterator(const iterator &copy) : _node(copy._node) { }
+			~tree_const_iterator() { }
+
 		protected:
 			bool	is_super(const tree_node_base *ptr)
 			{
@@ -265,19 +292,19 @@ namespace ft
 	template <class T>
 	bool	operator!=(const tree_const_iterator<T> &lhs, const tree_const_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>
 	bool	operator!=(const tree_iterator<T> &lhs, const tree_const_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>
 	bool	operator!=(const tree_const_iterator<T> &lhs, const tree_iterator<T> &rhs)
 	{
-		return (lhs._node != rhs._node);
+		return (!(lhs == rhs));
 	}
 
 	template <class T>

@@ -17,7 +17,8 @@
 #  define DEQUE_BUF_SIZE 512
 # endif
 
-# include "vector.hpp"	// will include all the needed headers
+# include "utility.hpp"
+# include "iterator.hpp"
 
 namespace ft
 {
@@ -27,105 +28,167 @@ namespace ft
 	}
 
 	template <typename T, typename Reference, typename Pointer>
-	struct	deque_iterator
+	class	deque_iterator
 	{
-		typedef deque_iterator<T, T&, T*>				iterator;
-		typedef deque_iterator<T, const T&, const T*>	const_iterator;
-		typedef T*										element_pointer;
-		typedef T**										map_pointer;
+		private:
+			friend bool operator==(const deque_iterator &lhs,
+					const deque_iterator &rhs);
+		protected:
+			typedef deque_iterator<T, T&, T*>				iterator;
+			typedef deque_iterator<T, const T&, const T*>	const_iterator;
+			typedef T*										element_pointer;
+			typedef T**										map_pointer;
+		public:
+			typedef std::random_access_iterator_tag			iterator_category;
+			typedef T										value_type;
+			typedef Pointer									pointer;
+			typedef Reference								reference;
+			typedef size_t									size_type;
+			typedef ptrdiff_t								difference_type;
 
-		typedef std::random_access_iterator_tag			iterator_category;
-		typedef T										value_type;
-		typedef Pointer									pointer;
-		typedef Reference								reference;
-		typedef size_t									size_type;
-		typedef ptrdiff_t								difference_type;
-
-		static size_type	chunk_size() const
-		{
-			return (deque_chunk_size(sizeof(value_type)));
-		}
-
-		element_pointer	curr;
-		element_pointer	first;
-		element_pointer	last;
-		map_pointer		node;
-
-		deque_iterator() : curr(), first(), last(), node() { }
-
-		deque_iterator(element_pointer element, map_pointer node) : curr(element), first(*node),
-			last(*node + chunk_size()), node(node) { }
-		
-		deque_iterator(const iterator &copy) : curr(copy.curr), first(copy.first), last(copy.last), node(copy.node) { }
-
-		deque_iterator	&operator=(const deque_iterator &rhs)
-		{
-			this->curr = rhs.curr;
-			this->first = rhs.first;
-			this->last = rhs.last;
-			this->node = rhs.node;
-		}
-
-		reference	operator*() const
-		{
-			return (*this->curr);
-		}
-
-		deque_iterator	operator+(difference_type n) const
-		{
-			deque_iterator	it(*this);
-
-			if (n < it.last - it.curr)
-				it.curr += n;
-			else
+		public:
+			static size_type	chunk_size()
 			{
-				if (it.curr + n >= it.last)	// align the offset
-				{
-					it.node++;
-					n -= it.last - it.curr;
-				}
-				it.node += n / chunk_size();
-				it.curr = *it.node + (n % chunk_size());
-				it.first = *it.node;
-				it.last = it.first + chunk_size();
+				return (deque_chunk_size(sizeof(value_type)));
 			}
-			return (it);
-		}
 
-		deque_iterator	operator-(difference_type n) const
-		{
-			deque_iterator	it(*this);
+		private:
+			element_pointer	_curr;
+			element_pointer	_first;
+			element_pointer	_last;
+			map_pointer		_node;
 
-			if (n <= it.curr - it.first)
-				it.curr -= n;
-			else
+		public:
+			deque_iterator() : _curr(), _first(), _last(), _node() { }
+
+			deque_iterator(element_pointer element, map_pointer node) : _curr(element), _first(*node),
+				_last(*node + chunk_size()), _node(node) { }
+			
+			deque_iterator(const iterator &copy) : _curr(copy._curr), _first(copy._first), _last(copy._last), _node(copy._node) { }
+
+			deque_iterator	&operator=(const deque_iterator &rhs)
 			{
-				if (it.curr - n < it.first)
-				{
-					it.node--;
-					n -= curr
-				}
+				this->_curr = rhs._curr;
+				this->_first = rhs._first;
+				this->_last = rhs._last;
+				this->_node = rhs._node;
 			}
-		}
+
+			reference	operator*() const
+			{
+				return (*this->_curr);
+			}
+
+			deque_iterator	operator+(difference_type n) const
+			{
+				deque_iterator	it(*this);
+
+				if (n < it._last - it._curr)
+					it._curr += n;
+				else
+				{
+					if (it._curr + n >= it._last)	// align the offset
+					{
+						it._node++;
+						n -= it._last - it._curr;
+					}
+					it._node += n / chunk_size();
+					it._curr = *it._node + (n % chunk_size());
+					it._first = *it._node;
+					it._last = it._first + chunk_size();
+				}
+				return (it);
+			}
+
+			deque_iterator	operator-(difference_type n) const
+			{
+				deque_iterator	it(*this);
+
+				if (n <= it._curr - it._first)
+					it._curr -= n;
+				else
+				{
+					if (it._curr - n < it._first)	// align the offset
+					{
+						it._node--;
+						n -= it._curr - it._first;
+					}
+					it._node -= n / chunk_size();
+					it._curr = *it._node + chunk_size() - (n % chunk_size());
+					it._first = *it._node;
+					it._last = it._first + chunk_size();
+				}
+				return (it);
+			}
+
+			deque_iterator	&operator+=(difference_type n)
+			{
+				return (*this = operator+(n));
+			}
+
+			deque_iterator	&operator-=(difference_type n)
+			{
+				return (*this = operator-(n));
+			}
+
+			deque_iterator	&operator++()
+			{
+				return (*this += 1);
+			}
+
+			deque_iterator	&operator--()
+			{
+				return (*this -= 1);
+			}
+			deque_iterator	operator++(int)
+			{
+				deque_iterator	temp = *this;
+				operator++();
+				return (temp);
+			}
+
+			deque_iterator	operator--(int)
+			{
+				deque_iterator	temp = *this;
+				operator--();
+				return (temp);
+			}
+
+			pointer	operator->() const
+			{
+				return (addressof(operator*()));
+			}
+
+			reference	operator[](difference_type n) const
+			{
+				return (*operator+(n));
+			}
 	};
+
+	template <class T, class Reference, class Pointer>
+	bool operator==(const deque_iterator<T, Reference, Pointer> &lhs,
+					const deque_iterator<T, Reference, Pointer> &rhs)
+	{
+		return (lhs._curr == rhs._curr);
+	}
 
 	template <class T, class Alloc = std::allocator<T> >
 	class	deque
 	{
 		public:
 			// member types
-			typedef T											value_type;
-			typedef Alloc										allocator_type;
-			typedef typename allocator_type::reference			reference;
-			typedef typename allocator_type::const_reference	const_reference;
-			typedef typename allocator_type::pointer			pointer;
-			typedef typename allocator_type::const_pointer		const_pointer;
-			typedef ptrdiff_t									difference_type;
-			typedef size_t										size_type;
-			// typedef normal_iterator<pointer, vector>			iterator;
-			// typedef normal_iterator<const_pointer, vector>		const_iterator;
-			// typedef ft::reverse_iterator<iterator>				reverse_iterator;
-			// typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
+			typedef T															value_type;
+			typedef Alloc														allocator_type;
+			typedef typename allocator_type::reference							reference;
+			typedef typename allocator_type::const_reference					const_reference;
+			typedef typename allocator_type::pointer							pointer;
+			typedef typename allocator_type::const_pointer						const_pointer;
+			typedef ptrdiff_t													difference_type;
+			typedef size_t														size_type;
+			typedef deque_iterator<value_type, reference, pointer>				iterator;
+			typedef deque_iterator<value_type, const_reference, const_pointer>	const_iterator;
+			typedef ft::reverse_iterator<iterator>								reverse_iterator;
+			typedef ft::reverse_iterator<const_iterator>						const_reverse_iterator;
 		protected:
 	};
 }
