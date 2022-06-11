@@ -43,9 +43,10 @@ int A::num = 0;
 int		main(void)
 {
 	ft::deque<int>::iterator	hell1;
-	ft::deque<int>::iterator	hell2;
+	ft::deque<int>::const_iterator	hell2(hell1);
 
-	bool eq = hell1 == hell2;
-	if (eq)
-		;
+	// bool eq = hell1 == hell2;
+	// eq = hell1 < hell2;
+	// if (eq)
+	// 	;
 }

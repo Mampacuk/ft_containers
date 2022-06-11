@@ -28,16 +28,19 @@ namespace ft
 	}
 
 	template <typename T, typename Reference, typename Pointer>
+	// template <typename T>
 	class	deque_iterator
 	{
-		private:
-			friend bool operator==(const deque_iterator &lhs,
-					const deque_iterator &rhs);
+		// private:
+		// 	template <class T1, class Reference1, class Pointer1>
+		// 	friend bool operator==(const deque_iterator<T1, Reference1, Pointer1> &lhs,
+		// 			const deque_iterator<T1, Reference1, Pointer1> &rhs);
 		protected:
 			typedef deque_iterator<T, T&, T*>				iterator;
 			typedef deque_iterator<T, const T&, const T*>	const_iterator;
 			typedef T*										element_pointer;
 			typedef T**										map_pointer;
+			typedef deque_iterator							self;
 		public:
 			typedef std::random_access_iterator_tag			iterator_category;
 			typedef T										value_type;
@@ -46,12 +49,6 @@ namespace ft
 			typedef size_t									size_type;
 			typedef ptrdiff_t								difference_type;
 
-		public:
-			static size_type	chunk_size()
-			{
-				return (deque_chunk_size(sizeof(value_type)));
-			}
-
 		private:
 			element_pointer	_curr;
 			element_pointer	_first;
@@ -59,6 +56,11 @@ namespace ft
 			map_pointer		_node;
 
 		public:
+			static size_type	chunk_size()
+			{
+				return (deque_chunk_size(sizeof(value_type)));
+			}
+
 			deque_iterator() : _curr(), _first(), _last(), _node() { }
 
 			deque_iterator(element_pointer element, map_pointer node) : _curr(element), _first(*node),
@@ -66,7 +68,7 @@ namespace ft
 			
 			deque_iterator(const iterator &copy) : _curr(copy._curr), _first(copy._first), _last(copy._last), _node(copy._node) { }
 
-			deque_iterator	&operator=(const deque_iterator &rhs)
+			self	&operator=(const deque_iterator &rhs)
 			{
 				this->_curr = rhs._curr;
 				this->_first = rhs._first;
@@ -121,25 +123,26 @@ namespace ft
 				return (it);
 			}
 
-			deque_iterator	&operator+=(difference_type n)
+			self	&operator+=(difference_type n)
 			{
 				return (*this = operator+(n));
 			}
 
-			deque_iterator	&operator-=(difference_type n)
+			self	&operator-=(difference_type n)
 			{
 				return (*this = operator-(n));
 			}
 
-			deque_iterator	&operator++()
+			self	&operator++()
 			{
 				return (*this += 1);
 			}
 
-			deque_iterator	&operator--()
+			self	&operator--()
 			{
 				return (*this -= 1);
 			}
+
 			deque_iterator	operator++(int)
 			{
 				deque_iterator	temp = *this;
@@ -163,14 +166,90 @@ namespace ft
 			{
 				return (*operator+(n));
 			}
+			
+			// relational operators
+			friend bool operator==(const self &lhs, const self &rhs)
+			{
+				return (lhs._curr == rhs._curr);
+			}
+
+			template <class ReferenceR, class PointerR>
+			friend bool operator==(const self &lhs, const deque_iterator<T, ReferenceR, PointerR> &rhs)
+			{
+				return (lhs._curr == rhs._curr);
+			}
+
+			friend bool	operator<(const self &lhs, const self &rhs)
+			{
+				if (lhs._node == rhs._node)
+					return (lhs._curr < rhs._curr);
+				return (lhs._node < rhs._node);
+			}
+
+			template <class ReferenceR, class PointerR>
+			friend bool operator<(const self &lhs, const deque_iterator<T, ReferenceR, PointerR> &rhs)
+			{
+				if (lhs._node == rhs._node)
+					return (lhs._curr < rhs._curr);
+				return (lhs._node < rhs._node);
+			}
 	};
 
-	template <class T, class Reference, class Pointer>
-	bool operator==(const deque_iterator<T, Reference, Pointer> &lhs,
-					const deque_iterator<T, Reference, Pointer> &rhs)
-	{
-		return (lhs._curr == rhs._curr);
-	}
+	// template <class T, class Reference, class Pointer>
+	// bool	operator!=(const deque_iterator<T, Reference, Pointer> &lhs,
+	// 					const deque_iterator<T, Reference, Pointer> &rhs)
+	// {
+	// 	return (!(lhs == rhs));
+	// }
+
+	// template <class T, class ReferenceL, class ReferenceR, class PointerL, class PointerR>
+	// bool	operator!=(const deque_iterator<T, ReferenceL, PointerL> &lhs,
+	// 					const deque_iterator<T, ReferenceR, PointerR> &rhs)
+	// {
+	// 	return (!(lhs == rhs));
+	// }
+
+	// template <class T, class Reference, class Pointer>
+	// bool	operator<=(const deque_iterator<T, Reference, Pointer> &lhs,
+	// 					const deque_iterator<T, Reference, Pointer> &rhs)
+	// {
+	// 	return (!(rhs < lhs));
+	// }
+
+	// template <class T, class ReferenceL, class ReferenceR, class PointerL, class PointerR>
+	// bool	operator<=(const deque_iterator<T, ReferenceL, PointerL> &lhs,
+	// 					const deque_iterator<T, ReferenceR, PointerR> &rhs)
+	// {
+	// 	return (!(rhs < lhs));
+	// }
+
+	// template <class T, class Reference, class Pointer>
+	// bool	operator>(const deque_iterator<T, Reference, Pointer> &lhs,
+	// 					const deque_iterator<T, Reference, Pointer> &rhs)
+	// {
+	// 	return (rhs < lhs);
+	// }
+
+	// template <class T, class ReferenceL, class ReferenceR, class PointerL, class PointerR>
+	// bool	operator>(const deque_iterator<T, ReferenceL, PointerL> &lhs,
+	// 					const deque_iterator<T, ReferenceR, PointerR> &rhs)
+	// {
+	// 	return (rhs < lhs);
+	// }
+
+	// template <class T, class Reference, class Pointer>
+	// bool	operator>=(const deque_iterator<T, Reference, Pointer> &lhs,
+	// 					const deque_iterator<T, Reference, Pointer> &rhs)
+	// {
+	// 	return (!(lhs < rhs));
+	// }
+
+	// template <class T, class ReferenceL, class ReferenceR, class PointerL, class PointerR>
+	// bool	operator>=(const deque_iterator<T, ReferenceL, PointerL> &lhs,
+	// 					const deque_iterator<T, ReferenceR, PointerR> &rhs)
+	// {
+	// 	return (!(lhs < rhs));
+	// }
 
 	template <class T, class Alloc = std::allocator<T> >
 	class	deque
