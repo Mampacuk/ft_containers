@@ -16,6 +16,7 @@
 # include <sstream>
 # include <exception>
 # include <cstddef>
+# include <climits>
 # include "pair.hpp"
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \

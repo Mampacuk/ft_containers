@@ -122,14 +122,14 @@ namespace ft
 	};
 
 	template <class Iterator, class Container>
-	bool operator==(const normal_iterator<Iterator, Container> &lhs,
+	bool	operator==(const normal_iterator<Iterator, Container> &lhs,
 					const normal_iterator<Iterator, Container> &rhs)
 	{
 		return (lhs.base() == rhs.base());
 	}
 
 	template <class IteratorL, class IteratorR, class Container>
-	bool operator==(const normal_iterator<IteratorL, Container> &lhs,
+	bool	operator==(const normal_iterator<IteratorL, Container> &lhs,
 					const normal_iterator<IteratorR, Container> &rhs)
 	{
 		return (lhs.base() == rhs.base());
@@ -238,8 +238,7 @@ namespace ft
 			typedef normal_iterator<const_pointer, vector>		const_iterator;
 			typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
-		
-		protected:
+		private:
 			// private member variables
 			allocator_type	_alloc;
 			pointer			_data;
@@ -262,8 +261,7 @@ namespace ft
 			{
 				constructor_dispatch(first, last, typename ft::is_integral<InputIterator>::type());
 			}
-
-		protected:
+		private:
 			template <class InputIterator>
 			void	constructor_dispatch(InputIterator first, InputIterator last, ft::false_type)
 			{
@@ -310,7 +308,6 @@ namespace ft
 				ft::uninitialized_copy_a(first, last, this->_data, this->_alloc);
 				this->_size = n;
 			}
-
 		public:
 			vector(const vector &x) : _alloc(x._alloc), _data(NULL), _capacity(0), _size(0)
 			{
@@ -494,8 +491,7 @@ namespace ft
 			{
 				assign_dispatch(first, last, typename ft::is_integral<InputIterator>::type());
 			}
-
-		protected:
+		private:
 			template <typename InputIterator>
 			void	assign_dispatch(InputIterator first, InputIterator last, false_type)
 			{
@@ -573,7 +569,6 @@ namespace ft
 				}
 				this->_size = len;
 			}
-
 		public:
 			void	push_back(const value_type &val)
 			{
@@ -656,8 +651,7 @@ namespace ft
 				// disambiguate between a possible fill call
 				insert_dispatch(position, first, last, typename ft::is_integral<InputIterator>::type());
 			}
-
-		protected:
+		private:
 			template <typename InputIterator>
 			void	insert_dispatch(iterator position, InputIterator first, InputIterator last, ft::false_type)
 			{
@@ -854,7 +848,7 @@ namespace ft
 			{
 				return (this->_alloc);
 			}
-		protected:	
+		private:	
 			pointer	allocate_a(size_type n)
 			{
 				return (n ? this->_alloc.allocate(n) : pointer());
@@ -885,12 +879,12 @@ namespace ft
 			size_type	check_length(size_type n, const char *s)
 			{
 				// the insertion will inevitably lead to running out of memory
-				if (this->max_size() - this->_size < n)
+				if (max_size() - this->_size < n)
 					throw std::length_error(s);
 				// either expand twice, or fit
 				const size_type	new_size = this->_size + ft::max(this->_size, n);
 				// in case if an overflow occured, or the doubling exceeds the max size, shrink to fit
-				return ((new_size < this->_size or new_size > this->max_size()) ? this->max_size() : new_size);
+				return ((new_size < this->_size or new_size > max_size()) ? max_size() : new_size);
 			}
 	};
 

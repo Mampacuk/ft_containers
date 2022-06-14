@@ -11,7 +11,8 @@
 /* ************************************************************************** */
 
 #include <iostream>
-#include "deque.hpp"
+// #include "deque.hpp"
+#include "vector.hpp"
 
 struct A
 {
@@ -42,11 +43,16 @@ int A::num = 0;
 
 int		main(void)
 {
-	ft::deque<int>::iterator	hell1;
-	ft::deque<int>::const_iterator	hell2(hell1);
+	std::allocator<int> a;
+	ft::vector<int>	vec(a);
 
-	// bool eq = hell1 == hell2;
+	vec.push_back(4);
+	// ft::deque<int>::iterator	hell1;
+	// ft::deque<int>::const_iterator	hell2(hell1);
+
+	// bool eq = hell2 >= hell1;
 	// eq = hell1 < hell2;
-	// if (eq)
+	// size_t	diff = hell1 - hell2;
+	// if (eq and diff)
 	// 	;
 }

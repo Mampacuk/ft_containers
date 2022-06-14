@@ -281,8 +281,7 @@ namespace ft
 				this->_trailer.prev = &this->_header;
 				constructor_dispatch(first, last, typename ft::is_integral<InputIterator>::type());
 			}
-
-		protected:
+		private:
 			template <class InputIterator>
 			void	constructor_dispatch(InputIterator first, InputIterator last, false_type)
 			{
@@ -295,7 +294,6 @@ namespace ft
 			{
 				fill_assign(n, val);
 			}
-
 		public:
 			list(const list &x) : _alloc(x._alloc), _header(), _trailer(), _size(0)
 			{
@@ -405,8 +403,7 @@ namespace ft
 			{
 				assign_dispatch(first, last, typename ft::is_integral<InputIterator>::type());
 			}
-
-		protected:
+		private:
 			template <class InputIterator>
 			void		assign_dispatch(InputIterator first, InputIterator last, false_type)
 			{
@@ -454,7 +451,6 @@ namespace ft
 				else
 					erase(begin, end());
 			}
-
 		public:
 			void	push_front(const value_type &val)
 			{
@@ -493,8 +489,7 @@ namespace ft
 			{
 				insert_dispatch(position, first, last, typename ft::is_integral<InputIterator>::type());
 			}
-
-		protected:
+		private:
 			template <class InputIterator>
 			void	insert_dispatch(iterator position, InputIterator first, InputIterator last, false_type)
 			{
@@ -522,7 +517,6 @@ namespace ft
 					first++;
 				}
 			}
-		
 		public:
 			iterator	erase(iterator position)
 			{
@@ -681,8 +675,7 @@ namespace ft
 			{
 				mergesort(*this, comp);
 			}
-
-		protected:
+		private:
 			template <class Compare>
 			void	mergesort(list &x, Compare comp)
 			{
@@ -701,7 +694,6 @@ namespace ft
 				x.splice(x.end(), left);
 				x.merge(right, comp);
 			}
-
 		public:
 			void	reverse()
 			{
@@ -724,7 +716,7 @@ namespace ft
 			{
 				return (allocator_type(this->_alloc));
 			}
-		protected:
+		private:
 			list_node_base	*destroy_position(iterator position)
 			{
 				allocator_type	alloc(this->_alloc);
@@ -752,6 +744,7 @@ namespace ft
 				link_nodes(new_node, position._node);
 			}
 
+			// forms relationship a->b and a<-b
 			void	link_nodes(list_node_base *a, list_node_base *b)
 			{
 				a->next = b;

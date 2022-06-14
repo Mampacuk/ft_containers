@@ -346,6 +346,7 @@ namespace ft
 			size_type			_size;
 			node_allocator_type	_alloc;
 			key_compare			_comp;
+
 		public:
 			explicit rbtree(const key_compare &comp = key_compare(), const allocator_type &alloc = allocator_type()) : _super(), _size(), _alloc(alloc), _comp(comp)
 			{
@@ -433,7 +434,7 @@ namespace ft
 			{
 				return (this->_alloc.max_size());
 			}
-		public:
+
 			iterator	insert(const_iterator position, const value_type &val)
 			{
 				return (insert(iterator(const_cast<tree_node_base*>(position._node)), val));
@@ -485,7 +486,7 @@ namespace ft
 				for (iterator hint = end(); first != last; ++first)	// speeds up the process if
 					hint = insert(hint, *first);			// elements are already sorted
 			}
-		protected:
+		private:
 			pair<iterator, bool>	hinted_insert(tree_node_base *hint, const value_type &val)
 			{
 				tree_node_base	*y = NULL;						// the node at which the insertion will happen
@@ -655,7 +656,7 @@ namespace ft
 					this->_super.parent = NULL;
 				update_super();
 			}
-		protected:
+		private:
 			void	erase_fixup(tree_node_base *x)
 			{
 				while (x != root() and is_black(x))
@@ -747,7 +748,7 @@ namespace ft
 					std::cout << ")" << std::endl;
 				}
 			}
-		public:
+		protected:
 			void	print(void) const
 			{
 				if (this->empty())
@@ -758,7 +759,7 @@ namespace ft
 				std::cout << "size: " << this->_size << std::endl;
 				this->print_node(root(), 0);
 			}
-
+		public:
 			void	clear()
 			{
 				destroy_subtree(root());
@@ -945,7 +946,7 @@ namespace ft
 			{
 				return (this->_alloc);
 			}
-		protected:
+		private:
 			const key_type	&extract_key(const value_type &val) const
 			{
 				return (KeyOfValue()(val));

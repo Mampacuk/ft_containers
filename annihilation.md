@@ -21,13 +21,14 @@ std::ostream	&operator<<(std::ostream &o, const A &a)
 
 int A::num = 0;
 ```
+### Constness
 *	Non-`const` member functions with their `const` counterparts should be implemented via the `const` version by applying `const_cast<>`.
 ## Vector
 ### Allocator
 *	Should be used to allocate memory and construct.
 *	Should be kept as an instance private member variable.
 ### Allocation
-*	Should be _exception-safe_. Construction of objects by using `construct()` may throw exceptions. In such case, if they're caught in `main()`, the `allocate()`d pointer must be freed, otherwise a memory leak occurs. This can be achieved by using try-catch block.
+*	Should be _exception-safe_. Construction of objects by using `construct()` may throw exceptions. In such case, if they're caught in `main()`, the `allocate()`d pointer must be freed, otherwise a memory leak occurs. This can be achieved by using try-catch blocks.
 *	Insertion, reserving and assigning may cause reallocation. In that case, both old and new objects are directly constructed back-to-back (this means one can't call `reserve()` and then inserting utility).
 ### Exceptions
 *	All versions of `at()` throw `std::out_of_range` if out of bounds
@@ -43,3 +44,11 @@ Should be implemented by returning allocator's `max_size()`.
 *	The latter implies that modifications to vector members have to be done in the right order in case if an error occurs (i.e. incrementing size before construction can result in a foul increment after a failed insert operation).
 ### Template Ambiguity
 *	Insert, assign and constructor functions must use either tag dispatching or SFINAE to differentiate between two numbers (fill function) and two iterators (range function) passed. The first approach is preferrable because it's not polluting the signature of the function.
+## List
+### Allocator
+*	Should be rebound to the node type.
+## Associative Containers
+### Allocator
+*	Should be rebound to the node type.
+### Complexity
+*	`begin()` and `end()` must be O(1) constant-time, as the standard requires. Otherwise the container fails for being 20 times slower than the standard.

@@ -35,7 +35,7 @@ namespace ft
 	}
 
 	// uninitialized_copy_a
-	// memory should be only allocated; objects shouldn't be constructed.
+	// memory should be only allocated; objects shouldn't be constructed, because that's what this function does.
 	template <typename InputIterator, typename ForwardIterator, typename Alloc>
 	ForwardIterator	uninitialized_copy_a(InputIterator first, InputIterator last, ForwardIterator result, Alloc &alloc)
 	{
