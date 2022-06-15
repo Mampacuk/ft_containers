@@ -562,10 +562,8 @@ namespace ft
 				{
 					ForwardIterator	mid = first;
 					ft::advance(mid, this->_size);
-					// copy upper part
-					ft::copy(first, mid, this->_data);
-					// construct lower part
-					ft::uninitialized_copy_a(mid, last, this->_data + this->_size, this->_alloc);
+					ft::copy(first, mid, this->_data);												// copy upper part
+					ft::uninitialized_copy_a(mid, last, this->_data + this->_size, this->_alloc);	// construct lower part
 				}
 				this->_size = len;
 			}

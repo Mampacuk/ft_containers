@@ -410,12 +410,7 @@ namespace ft
 					const size_type	this_size = this->size();
 					// enough elts currently, copy from x to this, and destroy the rest past x's elements
 					if (this_size >= x_size)
-					{
-						iterator new_end = ft::copy(x.begin(), x.end(), begin());	// copy down
-						destroy_elements(new_end, end());							// erase the rest
-						destroy_nodes(new_end._node + 1, this->_finish._node + 1);	// shrink to fit
-						this->_finish = new_end;									// update finish
-					}
+						erase_at_end(ft::copy(x.begin(), x.end(), begin()));									// update finish
 					else	// not enough elts, reallocation may happen
 					{
 						ft::copy(x.begin(), x.begin() + difference_type(this_size), begin());
@@ -513,81 +508,79 @@ namespace ft
 					}
 				}
 				else // slow insertion in the middle
-					insert_aux(position, first, last, n);
-			}
-
-			template <typename ForwardIterator>
-			void	insert_aux(iterator position, ForwardIterator first, ForwardIterator last, size_type n)
-			{
-				const difference_type	elems_before = position - this->_start;
-				const size_type			length = size();
-				// decide whether to displace (push) elements to the front (left) or back (right)
-				if (static_cast<size_type>(elems_before) < length / 2)
 				{
-					iterator	new_start = reserve_elements_at_front(n);
-					iterator	old_start = this->_start;
-					try
+					const difference_type	elems_before = position - this->_start;
+					const size_type			length = size();
+					// decide whether to displace (push) elements to the front (left) or back (right)
+					if (static_cast<size_type>(elems_before) < length / 2)
 					{
-						// 1 uninitialized_copy and 2 copies needed, otherwise if there's more to insert than there
-						// was before position, 2 uninitialized_copies and 1 copy needed:
-						// first two calls to copying either move existing elements and then the thied one moves from range,
-						// or vice versa
-						if (elems_before >= difference_type(n))
+						iterator	new_start = reserve_elements_at_front(n);
+						iterator	old_start = this->_start;
+						position = this->_start + elems_before;	// in case it was invalidated by reserve...
+						try
 						{
-							iterator	mid = this->_start + n; // from here, second half of existing elements will be copied to the old-start
-							ft::uninitialized_copy_a(this->_start, mid, new_start); // first half of existing elements built on raw memory
-							this->_start = new_start;
-							ft::copy(mid, position, old_start);						// second half of existing elements copied to non-raw memory
-							ft::copy(first, last, position - n);					// range is copied to non-raw memory
+							// 1 uninitialized_copy and 2 copies needed, otherwise if there's more to insert than there
+							// was before position, 2 uninitialized_copies and 1 copy needed:
+							// first two calls to copying either move existing elements and then the third one moves from range,
+							// or do the vice versa (first one moves existing elements, the other two -- range)
+							if (elems_before >= difference_type(n))
+							{
+								iterator	mid = this->_start + n; // from here, second half of existing elements will be copied to the old-start
+								ft::uninitialized_copy_a(this->_start, mid, new_start, this->_alloc); // first half of existing elements built on raw memory
+								this->_start = new_start;
+								ft::copy(mid, position, old_start);						// second half of existing elements copied to non-raw memory
+								ft::copy(first, last, position - n);					// range is copied to non-raw memory
+							}
+							else
+							{
+								iterator		range_begin;
+								ForwardIterator	mid = first;
+								ft::advance(mid, n - elems_before); // [first, mid) will be built on raw memory
+								range_begin = ft::uninitialized_copy_a(this->_start, position, new_start, this->_alloc); // all existing before elements built on raw memory
+								ft::uninitialized_copy_a(first, mid, range_begin, this->_alloc);	// first half of range built on raw memory
+								this->_start = new_start;
+								ft::copy(mid, last, old_start);										// second half of range copied to non-raw memory
+							}
 						}
-						else
+						catch (...)
 						{
-							iterator		range_begin;
-							ForwardIterator	mid = first;
-							ft::advance(mid, n - elems_before); // [first, mid) will be built on raw memory
-							range_begin = ft::uninitialized_copy_a(this->_start, position, new_start, this->_alloc); // all existing before elements built on raw memory
-							ft::uninitialized_copy_a(first, mid, range_begin, this->_alloc);	// first half of range built on raw memory
-							this->_start = new_start;
-							ft::copy(mid, last, old_start);										// second half of range copied to non-raw memory
-						}
-					}
-					catch (...)
-					{
-						// free chunks allocated by reserve* functions
-						destroy_nodes(new_start._node, this->_start._node);
-						throw ;
-					}
-				}
-				else	// symmetric code, but for back
-				{
-					iterator				new_finish = reserve_elements_at_back(n);
-					iterator				old_finish = this->_finish;
-					const difference_type	elems_after = difference_type(length) - elems_before;
-					try
-					{
-						if (elems_after > difference_type(n))
-						{
-							iterator	mid = this->_finish - difference_type(n);
-							ft::uninitialized_copy_a(mid, this->_finish, this->_finish, this->_alloc);
-							this->_finish = new_finish;
-							ft::copy(position, mid, old_finish);
-							ft::copy(first, last, position);
-						}
-						else
-						{
-							iterator		old_elems_begin;
-							ForwardIterator	mid = first;
-							ft::advance(mid, elems_after);
-							old_elems_begin = ft::uninitialized_copy_a(mid, last, this->_finish, this->_alloc);
-							ft::uninitialized_copy_a(position, this->_finish, old_elems_begin, this->_alloc);
-							this->_finish = new_finish;
-							ft::copy(first, mid, position);
+							// free chunks allocated by reserve* functions
+							destroy_nodes(new_start._node, this->_start._node);
+							throw ;
 						}
 					}
-					catch (...)
+					else	// symmetric code, but for back
 					{
-						destroy_nodes(this->_finish._node + 1, new_finish._node + 1);
-						throw ;
+						iterator				new_finish = reserve_elements_at_back(n);
+						iterator				old_finish = this->_finish;
+						const difference_type	elems_after = difference_type(length) - elems_before;
+						position = this->_finish - elems_after;	// in case it was invalidated by reserve...
+						try
+						{
+							if (elems_after > difference_type(n))
+							{
+								iterator	mid = this->_finish - n;
+								ft::uninitialized_copy_a(mid, this->_finish, this->_finish, this->_alloc);
+								this->_finish = new_finish;
+								ft::copy_backward(position, mid, old_finish);
+								ft::copy(first, last, position);
+							}
+							else
+							{
+								iterator		old_elems_begin;
+								ForwardIterator	mid = first;
+								ft::advance(mid, elems_after);
+								old_elems_begin = ft::uninitialized_copy_a(mid, last, this->_finish, this->_alloc);
+								ft::uninitialized_copy_a(position, this->_finish, old_elems_begin, this->_alloc);
+								this->_finish = new_finish;
+								ft::copy(first, mid, position);
+							}
+						}
+						catch (...)
+						{
+							destroy_nodes(this->_finish._node + 1, new_finish._node + 1);
+							throw ;
+						}
 					}
 				}
 			}
@@ -805,6 +798,326 @@ namespace ft
 				return (this->_start[size() - 1]);
 			}
 
+			// modifiers
+			void	assign(size_type n, const value_type &val)
+			{
+				fill_assign(n, val);
+			}
+
+			template <class InputIterator>
+			void	assign(InputIterator first, InputIterator last)
+			{
+				assign_dispatch(first, last, typename ft::is_integral<InputIterator>::type());
+			}
+		private:
+			template <typename InputIterator>
+			void	assign_dispatch(InputIterator first, InputIterator last, false_type)
+			{
+				// template argument was an iterator, proceed
+				range_assign(first, last, typename iterator_traits<InputIterator>::iterator_category());
+			}
+
+			template <typename Integral>
+			void	assign_dispatch(Integral n, Integral val, true_type)
+			{
+				// template argument was an integer, do fill_assign() instead
+				fill_assign(n, val);
+			}
+
+			void	fill_assign(size_type n, const value_type &val)
+			{
+				if (n > size())
+				{
+					ft::fill(begin(), end(), val);			// change existing contents
+					fill_insert(end(), n - size(), val);	// build past end
+				}
+				else
+				{
+					erase_at_end(begin() + difference_type(n));	// destroy past new end
+					ft::fill(begin(), end(), val);
+				}
+			}
+
+			template <typename InputIterator>
+			void	range_assign(InputIterator first, InputIterator last, std::input_iterator_tag)
+			{
+				iterator	curr = begin();
+				// copy starting from the beginning
+				for (; first != last and curr != end(); ++curr, ++first)
+					*curr = *first;
+				// if range is shorter than the deque
+				if (first == last)
+					erase_at_end(curr);
+				else
+					range_insert(end(), first, last, typename iterator_traits<InputIterator>::iterator_category());
+			}
+
+			template <typename ForwardIterator>
+			void	range_assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
+			{
+				const size_type	len = ft::distance(first, last);
+				if (len > size())
+				{
+					ForwardIterator	mid = first;
+					ft::advance(mid, size());
+					ft::copy(first, mid, begin());	// copy down whatever fits in current vector
+					range_insert(end(), mid, last, typename iterator_traits<ForwardIterator>::iterator_category()); // insert the rest
+				}
+				else
+					erase_at_end(ft::copy(first, last, begin()));	// copy down, erase the rest
+			}
+		public:
+			void	push_back(const value_type &val)
+			{
+				// there's a room in the rightmost node
+				if (this->_finish._curr != this->_finish._last - 1)
+				{
+					this->_alloc.construct(this->_finish._curr, val);
+					++this->_finish._curr;
+				}
+				// new node to the right needed
+				else
+				{
+					reserve_map_at_back();							// new pointers allocated
+					*(this->_finish._node + 1) = allocate_node();	// new node allocated
+					// order of instructions is important for the try-catch block!!
+					try
+					{
+						this->_alloc.construct(this->_finish._curr, val);
+						this->_finish.set_node(this->_finish._node + 1);
+						this->_finish._curr = this->_finish._first;
+					}
+					catch (...)
+					{
+						deallocate_node(*(this->_finish._node + 1));
+						throw ;
+					}
+				}
+			}
+
+			void	push_front(const value_type &val)
+			{
+				// there's a room in the leftmost node
+				if (this->_start._curr != this->_start._first)
+				{
+					this->_alloc.construct(this->_start._curr - 1, val);
+					--this->_start._curr;
+				}
+				// new node to the left needed
+				else
+				{
+					reserve_map_at_front();							// new pointers allocated
+					*(this->_start._node - 1) = allocate_node();	// new node allocated
+					try
+					{
+						this->_start.set_node(this->_start._node - 1);	// refresh start's node
+						this->_start._curr = this->_start._last - 1;	// point it to the last element in new chunk
+						this->_alloc.construct(this->_start._curr, val);// construct the element
+					}
+					catch (...)
+					{
+						++this->_start;									// fix start before throwing up
+						deallocate_node(*(this->_start._node - 1));		// clear the new node
+						throw ;											// leave
+					}
+				}
+			}
+
+			void	pop_back()
+			{
+				if (this->_finish._curr != this->_finish._first)	// if it's not
+				{													// the last in the chunk
+					--this->_start._curr;
+					this->_alloc.destroy(this->_finish._curr);
+				}
+				else
+				{
+					deallocate_node(this->_finish._first);			// don't need this chunk now
+					this->_finish.set_node(this->_finish._node - 1);
+					this->_finish._curr = this->_finish._last - 1;
+					this->_alloc.destroy(this->_finish._curr);		// the actual last element is in prev chunk
+				}
+			}
+
+			void	pop_front()
+			{
+				if (this->_start._curr != this->_start._last - 1)	// if it's not
+				{													// the last in the chunk
+					this->_alloc.destroy(this->_start._curr);
+					++this->_start._curr;
+				}
+				else
+				{
+					this->_alloc.destroy(this->_start._curr);
+					deallocate_node(this->_start._first);			// don't need this chunk now
+					this->_start.set_node(this->_start._node + 1);
+					this->_start._curr = this->_start._first;
+				}
+			}
+
+			iterator	insert(iterator position, const value_type &val)
+			{
+				if (position == begin())
+				{
+					push_front(val);
+					return (this->_start);
+				}
+				else if (position == end())
+				{
+					push_back(val);
+					return (--end());
+				}
+				else	// slow insertion in the middle
+				{
+					value_type		val_copy = val;	// see vector to understand why a copy is needed
+					difference_type	index = position - this->_start;
+					// decide where the displaced element goes
+					if (static_cast<size_type>(index) < size() / 2)	// displace to front
+					{
+						push_front(front());						// first element displaced, may be built on raw memory
+						iterator	old_front = this->_start + 1;	// have to move stuff here...
+						iterator	old_front_next = old_front + 1;	// ...starting from here...
+						position = this->_start + index;			// points to where the new element is inserted, behind original position
+						iterator	old_position = position + 1;	// ...till here
+						ft::copy(old_front_next, old_position, old_front);
+					}
+					else	// displace to back
+					{
+						push_back(back());
+						iterator	old_back = this->_finish - 1;
+						iterator	old_back_prev = old_back - 1;
+						position = this->_start + index;			// in case it was invalidated
+						ft::copy_backward(position, old_back_prev, old_back);
+					}
+					*position = val_copy;
+					return (position);
+				}
+			}
+
+			void	fill_insert(iterator position, size_type n, const value_type &val)
+			{
+				if (position == begin())
+				{
+					iterator	new_start = reserve_elements_at_front(n);
+					try
+					{	// fill in the reserved cells
+						ft::uninitialized_fill_a(new_start, this->_start, val, this->_alloc);
+						this->_start = new_start;
+					}
+					catch (...)
+					{
+						destroy_nodes(new_start._node, this->_start._node);
+						throw ;
+					}
+				}
+				else if (position == end())
+				{
+					iterator	new_finish = reserve_elements_at_back(n);
+					try
+					{	// fill in the reserved cells
+						ft::uninitialized_fill_a(this->_finish, new_finish, val, this->_alloc);
+						this->_finish = new_finish;
+					}
+					catch (...)
+					{
+						destroy_nodes(this->_finish._node + 1, new_finish._node + 1);
+						throw ;
+					}
+				}
+				else
+				{
+					const difference_type	elems_before = position - this->_start;
+					const size_type			length = size();
+					value_type				val_copy = val; // in case points to element inside container
+					// decide whether to displace (push) elements to the front (left) or back (right)
+					if (elems_before < difference_type(length / 2))
+					{
+						iterator	new_start = reserve_elements_at_front(n);
+						iterator	old_start = this->_start;
+						position = this->_start + elems_before;
+						try
+						{
+							if (elems_before >= difference_type(n))
+							{
+								iterator	mid = this->_start + n;	// from here, second half of existing elements will be copied to the old-start
+								ft::uninitialized_copy_a(this->_start, mid, new_start, this->_alloc); // first half of existing elements built on raw memory
+								this->_start = new_start;
+								ft::copy(mid, position, old_start);	// second half of existing elements copied to non-raw memory
+								ft::fill(position - difference_type(n), position, val_copy); // fill
+							}
+							else
+							{
+								iterator	mid = ft::uninitialized_copy_a(this->_start, position, new_start, this->_alloc);
+								ft::uninitialized_fill_a(mid, this->_start, val_copy, this->_alloc);
+								this->_start = new_start;
+								ft::fill(old_start, position, val_copy);
+							}
+						}
+						catch (...)
+						{
+							destroy_nodes(new_start._node, this->_start._node);
+							throw ;
+						}
+					}
+					else
+					{
+						iterator				new_finish = reserve_elements_at_back(n);
+						iterator				old_finish = this->_finish;
+						const difference_type	elems_after = difference_type(length) - elems_before;
+						position = this->_finish - elems_after;	// in case it was invalidated by reservation
+						try
+						{
+							if (elems_after > difference_type(n))
+							{
+								iterator	mid = this->_finish - n;
+								ft::uninitialized_copy_a(mid, this->_finish, this->_finish, this->_alloc);		// lower part of existing elements built
+								this->_finish = new_finish;
+								ft::copy_backward(position, mid, old_finish);									// upper part of existing elements copied
+								ft::fill(position, position + n, val_copy);										// filling out on non-raw memory
+							}
+							else
+							{
+								ft::uninitialized_fill_a(this->_finish, position + n, val_copy, this->_alloc);	// lower part of fill built
+								ft::uninitialized_copy_a(position, this->_finish, position + n, this->_alloc);	// existing elements transferred
+								this->_finish = new_finish;
+								ft:fill(position, old_finish, val_copy);										// upper part of fill copied
+							}
+						}
+						catch (...)
+						{
+							destroy_nodes(this->_finish._node + 1, new_finish._node + 1);
+							throw ;
+						}
+					}
+				}
+			}
+	private:
+			void	insert(iterator position, size_type n, const value_type &val)
+			{
+				fill_insert(position, n, val);
+			}
+
+			template <class InputIterator>
+			void	insert(iterator position, InputIterator first, InputIterator last)
+			{
+				// disambiguate between a possible fill call
+				insert_dispatch(position, first, last, typename ft::is_integral<InputIterator>::type());
+			}
+		private:
+			template <typename InputIterator>
+			void	insert_dispatch(iterator position, InputIterator first, InputIterator last, ft::false_type)
+			{
+				// template argument was an iterator, proceed
+				range_insert(position, first, last, typename ft::iterator_traits<InputIterator>::iterator_category());
+			}
+
+			template <typename Integral>
+			void	insert_dispatch(iterator position, Integral n, Integral val, ft::true_type)
+			{
+				// template argument was an integer, do fill_insert() instead
+				fill_insert(position, n, val);
+			}
+
 			allocator_type	get_allocator() const
 			{
 				return (this->_alloc);
@@ -853,6 +1166,14 @@ namespace ft
 				}
 				else
 					ft::destroy_a(first._curr, last._curr, this->_alloc);
+			}
+
+			// destroys elements AND nodes after position and sets it to new end()
+			void	erase_at_end(iterator position)
+			{
+				destroy_elements(position, end());
+				destroy_nodes(position._node + 1, this->_finish._node + 1);
+				this->_finish = position;
 			}
 
 			size_type	check_length(size_type n)
