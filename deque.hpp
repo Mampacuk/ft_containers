@@ -402,6 +402,13 @@ namespace ft
 				range_construct(x.begin(), x.end(), std::random_access_iterator_tag());
 			}
 
+			~deque()
+			{
+				destroy_elements(this->_start, this->_finish);
+				destroy_nodes(this->_start._node, this->_finish._node + 1);
+				deallocate_map(this->_map, this->_map_size);
+			}
+
 			deque	&operator=(const deque &x)
 			{
 				if (&x != this)
@@ -418,13 +425,6 @@ namespace ft
 					}
 				}
 				return (*this);
-			}
-
-			~deque()
-			{
-				destroy_elements(this->_start, this->_finish);
-				destroy_nodes(this->_start._node, this->_finish._node + 1);
-				deallocate_map(this->_map, this->_map_size);
 			}
 
 			// iterators
@@ -860,7 +860,7 @@ namespace ft
 				{
 					ForwardIterator	mid = first;
 					ft::advance(mid, size());
-					ft::copy(first, mid, begin());	// copy down whatever fits in current vector
+					ft::copy(first, mid, begin());	// copy down whatever fits in current deque
 					range_insert(end(), mid, last, typename iterator_traits<ForwardIterator>::iterator_category()); // insert the rest
 				}
 				else
@@ -969,7 +969,7 @@ namespace ft
 				}
 				else	// slow insertion in the middle
 				{
-					value_type		val_copy = val;	// see vector to understand why a copy is needed
+					value_type		val_copy = val;	// see deque to understand why a copy is needed
 					difference_type	index = position - this->_start;
 					// decide where the displaced element goes
 					if (static_cast<size_type>(index) < size() / 2)	// displace to front
@@ -993,7 +993,7 @@ namespace ft
 					return (position);
 				}
 			}
-
+		private:
 			void	fill_insert(iterator position, size_type n, const value_type &val)
 			{
 				if (position == begin())
@@ -1091,7 +1091,7 @@ namespace ft
 					}
 				}
 			}
-	private:
+		public:
 			void	insert(iterator position, size_type n, const value_type &val)
 			{
 				fill_insert(position, n, val);
@@ -1116,6 +1116,67 @@ namespace ft
 			{
 				// template argument was an integer, do fill_insert() instead
 				fill_insert(position, n, val);
+			}
+		public:
+			iterator	erase(iterator position)
+			{
+				iterator				next = position + 1;
+				const difference_type	index = position - begin();
+				// to the left or to the right?
+				if (static_cast<size_type>(index) < size() / 2)
+				{
+					if (position != begin())	// shift elements
+						ft::copy_backward(begin(), position, next);
+					pop_front();
+				}
+				else
+				{
+					if (position != end())		// shift elements
+						ft::copy(next, end(), position);
+					pop_back();
+				}
+				return (begin() + index);
+			}
+
+			iterator	erase(iterator first, iterator last)
+			{
+				if (first == last) return (first);
+				else if (first == begin() and last == end())
+				{
+					clear();
+					return (end());
+				}
+				else
+				{
+					const difference_type	n = last - first;
+					const difference_type	elems_before = first - begin();
+					if (static_cast<size_type>(elems_before) <= (size() - n) / 2)
+					{
+						if (first != begin())
+							ft::copy_backward(begin(), first, last);
+						erase_at_begin(begin() + n);
+					}
+					else
+					{
+						if (last != end())
+							ft::copy(last, end(), first);
+						erase_at_end(end() - n);
+					}
+					return (begin() + elems_before);	// since `position` is invalidated
+				}
+			}
+
+			void	swap(deque &x)
+			{
+				ft::swap(this->_start, x._start);
+				ft::swap(this->_finish, x._finish);
+				ft::swap(this->_map, x._map);
+				ft::swap(this->_map_size, x._map_size);
+			}
+
+			void	clear()
+			{
+				erase_at_end(begin());
 			}
 
 			allocator_type	get_allocator() const
@@ -1176,6 +1237,14 @@ namespace ft
 				this->_finish = position;
 			}
 
+			// destroys elements AND nodes before position and sets it to new begin()
+			void	erase_at_begin(iterator position)
+			{
+				destroy_elements(begin(), position);
+				destroy_nodes(this->_start._node, position._node);
+				this->_start = position;
+			}
+
 			size_type	check_length(size_type n)
 			{
 				if (n > ft::min(LLONG_MAX, max_size()))
@@ -1183,6 +1252,48 @@ namespace ft
 				return (n);
 			}
 	};
+
+	template <class T, class Alloc>
+	void	swap(deque<T, Alloc> &x, deque<T, Alloc> &y)
+	{
+		x.swap(y);
+	}
+
+	template <class T, class Alloc>
+	bool operator==(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs)
+	{
+		return (lhs.size() == rhs.size() and ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
+	}
+
+	template <class T, class Alloc>
+	bool operator!=(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs)
+	{
+		return (!(lhs == rhs));
+	}
+
+	template <class T, class Alloc>
+	bool operator<(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs)
+	{
+		return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+	}
+
+	template <class T, class Alloc>
+	bool operator<=(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs)
+	{
+		return (!(rhs < lhs));
+	}
+
+	template <class T, class Alloc>
+	bool operator>(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs)
+	{
+		return (rhs < lhs);
+	}
+
+	template <class T, class Alloc>
+	bool operator>=(const deque<T, Alloc> &lhs, const deque<T, Alloc> &rhs)
+	{
+		return (!(lhs < rhs));
+	}
 }
 
 #endif

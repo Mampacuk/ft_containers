@@ -314,6 +314,13 @@ namespace ft
 				range_construct(x.begin(), x.end(), std::random_access_iterator_tag());
 			}
 
+			// (destructor)
+			~vector()
+			{
+				clear();
+				deallocate_a(this->_data, this->_capacity);
+			}
+
 			vector	&operator=(const vector &x)
 			{
 				if (&x != this)
@@ -340,13 +347,6 @@ namespace ft
 					this->_size = x_size;
 				}
 				return (*this);
-			}
-
-			// (destructor)
-			~vector()
-			{
-				clear();
-				deallocate_a(this->_data, this->_capacity);
 			}
 
 			// iterators
@@ -820,12 +820,15 @@ namespace ft
 
 			iterator	erase(iterator first, iterator last)
 			{
-				// if last is the end then no point to shift
-				if (last != end())
-					ft::copy(last, end(), first);
-				// destroy the rest
-				ft::destroy_a(first.base() + (end() - last), this->_data + this->_size, this->_alloc);
-				this->_size -= last - first;
+				if (first != last)
+				{
+					// if last is the end then no point to shift
+					if (last != end())
+						ft::copy(last, end(), first);
+					// destroy the rest
+					ft::destroy_a(first.base() + (end() - last), this->_data + this->_size, this->_alloc);
+					this->_size -= last - first;
+				}
 				return (first);
 			}
 
@@ -893,37 +896,37 @@ namespace ft
 	}
 
 	template <class T, class Alloc>
-	bool operator==(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+	bool operator==(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs)
 	{
 		return (lhs.size() == rhs.size() and ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
 	}
 
 	template <class T, class Alloc>
-	bool operator!=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+	bool operator!=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs)
 	{
 		return (!(lhs == rhs));
 	}
 
 	template <class T, class Alloc>
-	bool operator<(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+	bool operator<(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs)
 	{
 		return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
 	}
 
 	template <class T, class Alloc>
-	bool operator<=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+	bool operator<=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs)
 	{
 		return (!(rhs < lhs));
 	}
 
 	template <class T, class Alloc>
-	bool operator>(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+	bool operator>(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs)
 	{
 		return (rhs < lhs);
 	}
 
 	template <class T, class Alloc>
-	bool operator>=(const ft::vector<T, Alloc> &lhs, const ft::vector<T, Alloc> &rhs)
+	bool operator>=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs)
 	{
 		return (!(lhs < rhs));
 	}
