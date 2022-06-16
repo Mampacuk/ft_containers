@@ -684,7 +684,7 @@ namespace ft
 					this->_map_size = new_map_size;
 				}
 				this->_start.set_node(new_start);
-				this->_start.set_node(new_start + old_num_nodes - 1);
+				this->_finish.set_node(new_start + old_num_nodes - 1);
 			}
 
 			void	create_map(size_type num_elts)

@@ -40,7 +40,6 @@ int A::num = 0;
 
 #define TESTED_NAMESPACE ft
 
-
 int		main(void)
 {
 	
@@ -48,17 +47,8 @@ int		main(void)
 	// ft::deque<int>::const_iterator	hell2(hell1);
 	// hi.push_front("f");
 	// hi.push_front("f");
-	for (int i = 0; i < 32; i++)
-		hi.push_back("hi");
-	hi.push_back("b");
-	hi.push_back("b");
-	hi.push_front("f");
-	hi.push_front("f");
-	// hi.push_back("b");
-	// hi.push_back("b");
-	hi.pop_back();
-	hi.pop_back();
-	hi.pop_back();
+	for (int i = 0; i < 80; i++)
+		hi.push_front("f");
 	// hi.pop_front();
 	// hi.print();
 }

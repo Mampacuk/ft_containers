@@ -749,15 +749,15 @@ namespace ft
 				}
 			}
 		protected:
-			void	print(void) const
+			void	print() const
 			{
-				if (this->empty())
+				if (empty())
 				{
 					std::cout << "(null)" << std::endl;
 					return ;
 				}
 				std::cout << "size: " << this->_size << std::endl;
-				this->print_node(root(), 0);
+				print_node(root(), 0);
 			}
 		public:
 			void	clear()
@@ -930,9 +930,7 @@ namespace ft
 
 			pair<const_iterator, const_iterator>	equal_range(const key_type &k) const
 			{
-				const_iterator	low = lower_bound(k);
-				const_iterator	high = upper_bound(k);
-				return (ft::make_pair(low, high));
+				return (ft::make_pair(lower_bound(k), upper_bound(k)));
 			}
 
 			pair<iterator, iterator>	equal_range(const key_type &k)
