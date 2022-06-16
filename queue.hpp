@@ -13,9 +13,11 @@
 #ifndef QUEUE_HPP
 # define QUEUE_HPP
 
+# include "deque.hpp"
+
 namespace ft
 {
-	template <class T, class Container>
+	template <class T, class Container = deque<T> >
 	class	queue
 	{
 		public:
@@ -68,9 +70,9 @@ namespace ft
 			}
 		private:
 			template <class T1, class Container1>
-			friend bool	operator==(const stack<T1, Container1>&, const stack<T1, Container1>&);
+			friend bool	operator==(const queue<T1, Container1>&, const queue<T1, Container1>&);
 			template <class T1, class Container1>
-			friend bool	operator<(const stack<T1, Container1>&, const stack<T1, Container1>&);
+			friend bool	operator<(const queue<T1, Container1>&, const queue<T1, Container1>&);
 	};
 
 	template <class T, class Container>

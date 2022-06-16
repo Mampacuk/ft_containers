@@ -15,6 +15,7 @@
 
 # include <cstddef>
 # include <iterator>
+# include "memory.hpp"
 
 namespace ft
 {

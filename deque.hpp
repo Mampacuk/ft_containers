@@ -38,6 +38,8 @@ namespace ft
 		private:
 			template <typename Val, typename Ref, typename Ptr>
 			friend class deque_iterator;
+			template <typename T1, typename Alloc1>
+			friend class deque;
 		protected:
 			typedef deque_iterator<T, T&, T*>				iterator;
 			typedef deque_iterator<T, const T&, const T*>	const_iterator;
@@ -62,7 +64,7 @@ namespace ft
 			deque_iterator() : _curr(), _first(), _last(), _node() { }
 
 			deque_iterator(element_pointer element, map_pointer node) : _curr(element), _first(*node),
-				_last(*node + chunk_size()), _node(node) { }
+				_last(*node + deque_chunk_size<T>()), _node(node) { }
 			
 			deque_iterator(const iterator &copy) : _curr(copy._curr), _first(copy._first), _last(copy._last), _node(copy._node) { }
 
@@ -79,6 +81,7 @@ namespace ft
 				this->_first = rhs._first;
 				this->_last = rhs._last;
 				this->_node = rhs._node;
+				return (*this);
 			}
 
 			reference	operator*() const
@@ -99,7 +102,7 @@ namespace ft
 						it._node++;
 						n -= it._last - it._curr;
 					}
-					it.set_node(it.node + n / deque_chunk_size<T>());
+					it.set_node(it._node + n / deque_chunk_size<T>());
 					it._curr = *it._node + (n % deque_chunk_size<T>());
 				}
 				return (it);
@@ -343,7 +346,7 @@ namespace ft
 				try
 				{
 					// build fully filled chunks
-					for (curr = this->_start._node; curr != this->_finish._node; ++curr)
+					for (curr = this->_start._node; curr < this->_finish._node; ++curr)
 						ft::uninitialized_fill_a(*curr, *curr + deque_chunk_size<T>(), val, this->_alloc);
 					// build the last bit which may be smaller than chunk size
 					ft::uninitialized_fill_a(this->_finish._first, this->_finish._curr, val, this->_alloc);
@@ -380,7 +383,7 @@ namespace ft
 				try
 				{
 					// build fully filled chunks
-					for (curr = this->_start._node; curr != this->_finish._node; ++curr)
+					for (curr = this->_start._node; curr < this->_finish._node; ++curr)
 					{
 						ForwardIterator	mid = first;
 						ft::advance(mid, deque_chunk_size<T>());
@@ -421,7 +424,7 @@ namespace ft
 					else	// not enough elts, reallocation may happen
 					{
 						ft::copy(x.begin(), x.begin() + difference_type(this_size), begin());
-						range_insert(end(), x.begin() + difference_type(this_size), x.end(), std::random_access_iterator_tag);
+						range_insert(end(), x.begin() + difference_type(this_size), x.end(), std::random_access_iterator_tag());
 					}
 				}
 				return (*this);
@@ -484,7 +487,7 @@ namespace ft
 					iterator	new_start = reserve_elements_at_front(n);
 					try
 					{
-						ft::uninitialized_copy_a(first, last, new_start);
+						ft::uninitialized_copy_a(first, last, new_start, this->_alloc);
 						this->_start = new_start;
 					}
 					catch (...)
@@ -498,7 +501,7 @@ namespace ft
 					iterator	new_finish = reserve_elements_at_back(n);
 					try
 					{
-						ft::uninitialized_copy_a(first, last, end());
+						ft::uninitialized_copy_a(first, last, end(), this->_alloc);
 						this->_finish = new_finish;
 					}
 					catch (...)
@@ -688,7 +691,7 @@ namespace ft
 			{
 				const size_type	num_nodes = num_elts / deque_chunk_size<T>() + 1;
 
-				this->_map_size = ft::max(8, num_nodes + 2);
+				this->_map_size = ft::max(size_type(8), num_nodes + 2);
 				this->_map = allocate_map(this->_map_size);
 
 				map_pointer	map_start = this->_map + (this->_map_size - num_nodes) / 2;
@@ -717,7 +720,7 @@ namespace ft
 				map_pointer	curr;
 				try
 				{
-					for (curr = map_start; curr != map_finish; ++curr)
+					for (curr = map_start; curr < map_finish; ++curr)
 						*curr = allocate_node();
 				}
 				catch (...)
@@ -740,10 +743,11 @@ namespace ft
 
 			void	resize(size_type n, value_type val = value_type())
 			{
-				if (n > this->_size)
-					insert(end(), n - this->_size, val);
-				else if (n < this->_size)
-					erase(end() - (this->_size - n), end());
+				const size_type	this_size = size();
+				if (n > this_size)
+					insert(end(), n - this_size, val);
+				else if (n < this_size)
+					erase(end() - (this_size - n), end());
 			}
 
 			bool	empty() const
@@ -766,7 +770,7 @@ namespace ft
 			{
 				const size_type	this_size = size();
 				if (n >= this_size)
-					throw std::out_of_range("deque::at: n (which is " + SSTR(n) + ") >= this->size() (which is " + SSTR(this_size) + ")");
+					throw std::out_of_range("deque::_M_range_check: __n (which is " + SSTR(n) + ")>= this->size() (which is " + SSTR(this_size) + ")");
 				return (this->_start[n]);
 			}
 
@@ -774,7 +778,7 @@ namespace ft
 			{
 				const size_type	this_size = size();
 				if (n >= this_size)
-					throw std::out_of_range("deque::at: n (which is " + SSTR(n) + ") >= this->size() (which is " + SSTR(this_size) + ")");
+					throw std::out_of_range("deque::_M_range_check: __n (which is " + SSTR(n) + ")>= this->size() (which is " + SSTR(this_size) + ")");
 				return (this->_start[n]);
 			}
 
@@ -927,7 +931,7 @@ namespace ft
 			{
 				if (this->_finish._curr != this->_finish._first)	// if it's not
 				{													// the last in the chunk
-					--this->_start._curr;
+					--this->_finish._curr;
 					this->_alloc.destroy(this->_finish._curr);
 				}
 				else
@@ -1080,7 +1084,7 @@ namespace ft
 								ft::uninitialized_fill_a(this->_finish, position + n, val_copy, this->_alloc);	// lower part of fill built
 								ft::uninitialized_copy_a(position, this->_finish, position + n, this->_alloc);	// existing elements transferred
 								this->_finish = new_finish;
-								ft:fill(position, old_finish, val_copy);										// upper part of fill copied
+								ft::fill(position, old_finish, val_copy);										// upper part of fill copied
 							}
 						}
 						catch (...)
@@ -1131,7 +1135,7 @@ namespace ft
 				}
 				else
 				{
-					if (position != end())		// shift elements
+					if (position != end() - 1)	// shift elements
 						ft::copy(next, end(), position);
 					pop_back();
 				}
@@ -1210,20 +1214,20 @@ namespace ft
 
 			void	destroy_nodes(map_pointer first, map_pointer last)
 			{
-				for (map_pointer curr = first; curr != last; ++curr)
+				for (map_pointer curr = first; curr < last; ++curr)
 					deallocate_node(*curr);
 			}
 
 			void	destroy_elements(iterator first, iterator last)
 			{
 				// clear middle chunks that are completely filled
-				for (map_pointer node = first._node + 1; node != last._node; ++node)
+				for (map_pointer node = first._node + 1; node < last._node; ++node)
 					ft::destroy_a(*node, *node + deque_chunk_size<T>(), this->_alloc);
 				// clear leftovers from left and right
 				if (first._node != last._node)
 				{
 					ft::destroy_a(first._curr, first._last, this->_alloc);
-					ft::destroy_a(last._first, last._curr);
+					ft::destroy_a(last._first, last._curr, this->_alloc);
 				}
 				else
 					ft::destroy_a(first._curr, last._curr, this->_alloc);
@@ -1247,9 +1251,57 @@ namespace ft
 
 			size_type	check_length(size_type n)
 			{
-				if (n > ft::min(LLONG_MAX, max_size()))
+				if (n > ft::min(size_type(LLONG_MAX), max_size()))
 					throw std::length_error("cannot allocate requested memory");
 				return (n);
+			}
+		protected:
+			// prints deque's memory layout:
+			// x	- not allocated
+			// _	- allocated, but not constructed
+			// [ ]	- allocated, constructed
+			void	print() const
+			{
+				std::cout << "size(): " << size() << ", _map_size: " << this->_map_size << ", chunk-size: " << deque_chunk_size<T>() << std::endl;
+				std::cout << "map consists of the following addresses:" << std::endl;
+				for (size_type i = 0; i < this->_map_size; i++)
+				{
+					map_pointer	curr = this->_map + i;
+					std::cout << '[' << i << "]:" << curr << " -> ";
+					if (curr < this->_start._node or curr > this->_finish._node)
+						std::cout << std::string(deque_chunk_size<T>(), 'x') << ' ';
+					else
+					{
+						if (this->_start._node == this->_finish._node)
+						{
+							std::cout << std::string(this->_start._curr - this->_start._first, '_');
+							for (pointer elem = this->_start._curr; elem != this->_finish._curr; ++elem)
+								std::cout << '[' << *elem << ']';
+							std::cout << std::string(this->_finish._last - this->_start._curr, '_');
+						}
+						else
+						{
+							if (curr == this->_start._node)
+							{
+								std::cout << std::string(this->_start._curr - this->_start._first, '_');
+								for (pointer elem = this->_start._curr; elem != this->_start._last; ++elem)
+									std::cout << '[' << *elem << ']';
+							}
+							else if (curr == this->_finish._node)
+							{
+								for (pointer elem = this->_finish._first; elem != this->_finish._curr; ++elem)
+									std::cout << '[' << *elem << ']';
+								std::cout << std::string(this->_finish._last - this->_finish._curr, '_');
+							}
+							else
+							{
+								for (pointer elem = *curr; elem != *curr + deque_chunk_size<T>(); ++elem)
+									std::cout << '[' << *elem << ']';
+							}
+						}
+					}
+					std::cout << std::endl;
+				}
 			}
 	};
 

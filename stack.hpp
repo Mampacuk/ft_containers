@@ -13,11 +13,11 @@
 #ifndef STACK_HPP
 # define STACK_HPP
 
-# include "vector.hpp"
+# include "deque.hpp"
 
 namespace ft
 {
-	template <class T, class Container = vector<T> >
+	template <class T, class Container = deque<T> >
 	class	stack
 	{
 		public:
