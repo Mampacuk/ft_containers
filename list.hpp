@@ -304,7 +304,8 @@ namespace ft
 
 			list	&operator=(const list& x)
 			{
-				range_assign(x.begin(), x.end());
+				if (&x != this)
+					range_assign(x.begin(), x.end());
 				return (*this);
 			}
 
