@@ -244,11 +244,6 @@ namespace ft
 			{
 				return (this->_tree.get_allocator());
 			}
-
-			tree	&get_tree()
-			{
-				return (this->_tree);
-			}
 		private:
 			tree	_tree;
 		private:

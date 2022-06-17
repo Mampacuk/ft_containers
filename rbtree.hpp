@@ -373,8 +373,11 @@ namespace ft
 
 			rbtree	&operator=(const rbtree &x)
 			{
-				clear();
-				insert(x.begin(), x.end());
+				if (&x != this)
+				{
+					clear();
+					insert(x.begin(), x.end());
+				}
 				return (*this);
 			}
 
