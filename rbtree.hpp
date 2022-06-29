@@ -6,7 +6,7 @@
 /*   By: aisraely <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/06 19:53:23 by aisraely          #+#    #+#             */
-/*   Updated: 2022/02/06 19:53:23 by aisraely         ###   ########.fr       */
+/*   Updated: 2022/06/28 22:05:57 by aisraely         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,7 @@ namespace ft
 
 			pointer	operator->() const
 			{
-				return (addressof(operator*()));
+				return (ft::addressof(operator*()));
 			}
 	};
 
@@ -279,7 +279,7 @@ namespace ft
 
 			pointer	operator->() const
 			{
-				return (addressof(operator*()));
+				return (ft::addressof(operator*()));
 			}
 	};
 

@@ -112,7 +112,7 @@ namespace ft
 
 			pointer	operator->() const
 			{
-				return (addressof(operator*()));
+				return (ft::addressof(operator*()));
 			}
 
 			reference	operator[](difference_type n) const

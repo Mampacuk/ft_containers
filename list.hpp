@@ -108,7 +108,7 @@ namespace ft
 
 			pointer	operator->() const
 			{
-				return (addressof(operator*()));
+				return (ft::addressof(operator*()));
 			}
 	};
 
@@ -191,7 +191,7 @@ namespace ft
 
 			pointer	operator->() const
 			{
-				return (addressof(operator*()));
+				return (ft::addressof(operator*()));
 			}
 	};
 

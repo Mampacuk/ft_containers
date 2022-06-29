@@ -31,7 +31,7 @@ namespace ft
 	void	destroy_a(ForwardIterator first, ForwardIterator last, Alloc &alloc)
 	{
 		for (; first != last; ++first)
-			alloc.destroy(addressof(*first));
+			alloc.destroy(ft::addressof(*first));
 	}
 
 	// uninitialized_copy_a
@@ -43,7 +43,7 @@ namespace ft
 		try
 		{
 			for (; first != last; ++first, ++curr)
-				alloc.construct(addressof(*curr), *first);
+				alloc.construct(ft::addressof(*curr), *first);
 			return (curr);
 		}
 		catch (...)
@@ -62,7 +62,7 @@ namespace ft
 		try
 		{
 			for (; curr != last; ++curr)
-				alloc.construct(addressof(*curr), x);
+				alloc.construct(ft::addressof(*curr), x);
 		}
 		catch (...)
 		{
@@ -80,7 +80,7 @@ namespace ft
 		try
 		{
 			for (; n > 0; --n, ++curr)
-				alloc.construct(addressof(*curr), x);
+				alloc.construct(ft::addressof(*curr), x);
 		}
 		catch (...)
 		{
