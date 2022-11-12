@@ -34,7 +34,7 @@ int A::num = 0;
 *	Should be implemented by returning allocator's `max_size()`.
 *	The number returned by it is platform-dependent and, unfortunately, it doesn't have to coincide with the `std` version.
 ### Template Ambiguity
-*	Insert, assign and constructor functions of vector and deque must use either tag dispatching or SFINAE to differentiate between two numbers (fill function) and two iterators (range function) passed. The first approach is preferrable because it's not polluting the signature of the function.
+*	Insert, assign and constructor functions of vector and deque must use either tag dispatching or SFINAE to differentiate between two numbers (fill function) and two iterators (range function) passed. The latter approach is preferrable because it's not polluting the signature of the function.
 ### Iterators
 *	Must be STL-compliant, i.e. should have all types defined, and tags included. It should be passable to call `std::sort()` with them, for example.
 *	Should implement the arrow operator by calling `addressof()`! Otherwise, a class with `&` operator overload will call the operator overload function instead.
