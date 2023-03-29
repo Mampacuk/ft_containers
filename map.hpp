@@ -15,6 +15,7 @@
 
 # include "utility.hpp"
 # include "rbtree.hpp"
+# include <exception>
 
 namespace ft
 {
@@ -141,6 +142,24 @@ namespace ft
 			mapped_type	&operator[](const key_type &k)
 			{
 				return ((*(insert(ft::make_pair(k, mapped_type())).first)).second);
+			}
+
+			mapped_type &at(const key_type &k)
+			{
+				iterator finding = find(k);
+
+				if (finding == end())
+					throw std::out_of_range("Illegal access of a value with non-existent key.");
+				return (finding->second);
+			}
+
+			const mapped_type &at(const key_type &k) const
+			{
+				const_iterator finding = find(k);
+
+				if (finding == end())
+					throw std::out_of_range("Illegal access of a value with non-existent key.");
+				return (finding->second);
 			}
 
 			// modifiers

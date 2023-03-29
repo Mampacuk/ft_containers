@@ -729,39 +729,40 @@ namespace ft
 				}
 				x->color = black;
 			}
-
-			void	print_node(const tree_node_base *root, int offset) const
-			{
-				if (is_external(root))
-					return ;
-				for (int i = 0; i < offset; i++)
-					std::cout << "  ";
-				std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->data;
-				if (root->parent)
-					std::cout << (root == root->parent->left ? "L" : "R");
-				if (is_internal(root))
-					std::cout << " ( " ;
-				std::cout << std::endl;
-				this->print_node(root->left, offset + 2);
-				this->print_node(root->right, offset + 2);
-				if (is_internal(root))
-				{
-					for (int i = 0; i < offset + 1; i++)
-						std::cout << "  ";
-					std::cout << ")" << std::endl;
-				}
-			}
+			// // uncomment for printing purposes
+			// void	print_node(const tree_node_base *root, int offset) const
+			// {
+			// 	if (is_external(root))
+			// 		return ;
+			// 	for (int i = 0; i < offset; i++)
+			// 		std::cout << "  ";
+			// 	std::cout << (root->color ? "r" : "b") << static_cast<const node*>(root)->data;
+			// 	if (root->parent)
+			// 		std::cout << (root == root->parent->left ? "L" : "R");
+			// 	if (is_internal(root))
+			// 		std::cout << " ( " ;
+			// 	std::cout << std::endl;
+			// 	this->print_node(root->left, offset + 2);
+			// 	this->print_node(root->right, offset + 2);
+			// 	if (is_internal(root))
+			// 	{
+			// 		for (int i = 0; i < offset + 1; i++)
+			// 			std::cout << "  ";
+			// 		std::cout << ")" << std::endl;
+			// 	}
+			// }
 		protected:
-			void	print() const
-			{
-				if (empty())
-				{
-					std::cout << "(null)" << std::endl;
-					return ;
-				}
-				std::cout << "size: " << this->_size << std::endl;
-				print_node(root(), 0);
-			}
+			// // uncomment for printing purposes
+			// void	print() const
+			// {
+			// 	if (empty())
+			// 	{
+			// 		std::cout << "(null)" << std::endl;
+			// 		return ;
+			// 	}
+			// 	std::cout << "size: " << this->_size << std::endl;
+			// 	print_node(root(), 0);
+			// }
 		public:
 			void	clear()
 			{

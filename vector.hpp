@@ -398,7 +398,9 @@ namespace ft
 
 			size_type	max_size() const
 			{
-				return (this->_alloc.max_size());
+				// std::distance(begin(), end()) <= PTRDIFF_MAX.
+				// hence, return the minimum of the two values (upper-bound it).
+				return (min(static_cast<size_type>(std::numeric_limits<ptrdiff_t>::max()), this->_alloc.max_size()));
 			}
 
 			void	resize(size_type n, value_type val = value_type())
@@ -535,7 +537,7 @@ namespace ft
 				if (first == last)
 				{
 					// destroy the end
-					ft::destroy_a(curr, this->_data + this->_size);
+					ft::destroy_a(curr, this->_data + this->_size, this->_alloc);
 					// update the size
 					this->_size = curr - this->_data;
 				}
