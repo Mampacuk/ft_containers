@@ -21,9 +21,11 @@ namespace ft
 	class	stack
 	{
 		public:
-			typedef T									value_type;
-			typedef Container							container_type;
-			typedef typename container_type::size_type	size_type;
+			typedef T											value_type;
+			typedef Container									container_type;
+			typedef typename container_type::size_type			size_type;
+			typedef typename container_type::reference			reference;
+			typedef typename container_type::const_reference	const_reference;
 		protected:
 			container_type	c;
 		public:

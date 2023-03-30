@@ -17,6 +17,7 @@
 # include "algorithm.hpp"
 # include "memory.hpp"
 # include "iterator.hpp"
+# include <iostream>
 
 namespace ft
 {
@@ -729,7 +730,9 @@ namespace ft
 				}
 				x->color = black;
 			}
-			// // uncomment for printing purposes
+			/**
+			 * Uncomment for debugging purposes.
+			 */
 			// void	print_node(const tree_node_base *root, int offset) const
 			// {
 			// 	if (is_external(root))
@@ -752,7 +755,9 @@ namespace ft
 			// 	}
 			// }
 		protected:
-			// // uncomment for printing purposes
+			/**
+			 * Uncomment for debugging purposes.
+			 */
 			// void	print() const
 			// {
 			// 	if (empty())
@@ -776,6 +781,7 @@ namespace ft
 			{
 				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*x = root();
+				if (empty()) return (end());
 				while (is_internal(x)) // walk down the tree to find a match
 				{
 					x_null.parent = x;
@@ -820,6 +826,7 @@ namespace ft
 						x = x->parent;
 				}
 				nullify_leaf(&x_null); // undo the parent-child r-ships
+
 				return (end());
 			}
 
@@ -827,6 +834,7 @@ namespace ft
 			{
 				tree_node_base	x_null;	// to replace a NULL leaf with actual node with valid pointers
 				tree_node_base	*x = root();
+				if (empty()) return (end());
 				while (is_internal(x)) // walk down the tree to find a match
 				{
 					x_null.parent = x;
@@ -886,9 +894,23 @@ namespace ft
 			void	swap(rbtree &x)
 			{
 				// update superroot and min and max nodes' pointers
-				ft::swap(this->_super.left->right, x._super.left->right);
-				ft::swap(this->_super.right->left, x._super.right->left);
-				ft::swap(this->_super, x._super);
+				ft::swap(this->_super.parent, x._super.parent);
+				
+				// don't let the trees point to other tree's superroots when one of them is empty or underfilled
+				this->_super.left = is_super(this->_super.left) ? &x._super : this->_super.left;
+				x._super.left = x.is_super(x._super.left) ? &this->_super : x._super.left;
+				ft::swap(this->_super.left, x._super.left);
+				
+				this->_super.right = is_super(this->_super.right) ? &x._super : this->_super.right;
+				x._super.right = x.is_super(x._super.right) ? &this->_super : x._super.right;
+				ft::swap(this->_super.right, x._super.right);
+
+				// restore circularity for superroots
+				this->_super.left->right = &this->_super;
+				this->_super.right->left = &this->_super;
+				x._super.left->right = &x._super;
+				x._super.right->left = &x._super;
+				// update sizes
 				ft::swap(this->_size, x._size);
 			}
 
