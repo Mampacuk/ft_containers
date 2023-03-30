@@ -13,40 +13,39 @@
 #ifndef PAIR_HPP
 # define PAIR_HPP
 
-namespace ft { template <class T1, class T2> struct pair; }
-
-template <class T1, class T2>
-struct	ft::pair
+namespace ft
 {
-	typedef T1 first_type;
-	typedef T2 second_type;
-	first_type	first;
-	second_type	second;
 
-	// (constructor)
-	pair();
+	template <class T1, class T2>
+	struct pair
+	{
+		typedef T1 first_type;
+		typedef T2 second_type;
+		first_type	first;
+		second_type	second;
+
+		// (constructor)
+		pair() : first(), second() {};
+		template<class U, class V>
+			pair(const pair<U, V> &pr);
+		pair(const first_type &a, const second_type &b);
+		pair &operator=(const pair &pr);
+	};
+
+	template <class T1, class T2>
 	template<class U, class V>
-		pair(const pair<U, V> &pr);
-	pair(const first_type &a, const second_type &b);
-	pair &operator=(const pair &pr);
-};
+	pair<T1, T2>::pair(const pair<U, V> &pr) : first(pr.first), second(pr.second) {}
 
-template <class T1, class T2>
-ft::pair<T1, T2>::pair() {}
+	template <class T1, class T2>
+	pair<T1, T2>::pair(const first_type &a, const second_type &b) : first(a), second(b) {}
 
-template <class T1, class T2>
-template<class U, class V>
-ft::pair<T1, T2>::pair(const pair<U, V> &pr) : first(pr.first), second(pr.second) {}
-
-template <class T1, class T2>
-ft::pair<T1, T2>::pair(const first_type &a, const second_type &b) : first(a), second(b) {}
-
-template <class T1, class T2>
-ft::pair<T1, T2> &ft::pair<T1, T2>::operator=(const pair &pr)
-{
-	this->first = pr.first;
-	this->second = pr.second;
-	return (*this);
+	template <class T1, class T2>
+	pair<T1, T2> &pair<T1, T2>::operator=(const pair &pr)
+	{
+		this->first = pr.first;
+		this->second = pr.second;
+		return (*this);
+	}
 }
 
 #endif
