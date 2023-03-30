@@ -11,8 +11,8 @@ School 42's project "ft_containers" implementation.
 - [x] multiset
 - [x] multimap
 ## Notes
-*	Passes `mli`'s [tester](https://github.com/mli42/containers_test) with flying colors.
-*   Passes `mleblanc`'s [tester](https://github.com/Mikastiv/ft_containers-terminator) with flying colors.
+*	Passes `mli`'s [tester](https://github.com/mli42/containers_test) with flying colors. (except for a relational_ope test that complains about my own `ft::swap()`)
+*   Passes `mleblanc`'s [tester](https://github.com/Mikastiv/ft_containers-terminator) with flying colors, including the benchmarks.
 *	Check the Annihilation List at the root repository for some tricky cases and remarks so you can fail as many people as possible during the evaluation process!
 ## Credits
 *	"Introduction to Algorithms," aka CLRS, or the Bible of Algorithms, 3rd edition, for the red-black tree implementation, Chapter 13.
